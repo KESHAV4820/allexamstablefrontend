@@ -1,0 +1,15 @@
+{
+  "name": "allexamstable-project",
+  "version": "1.0.0",
+  "description": "this is the frontend part of allexamstable in postgre database query tool",
+  "default": "index.js",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html --dist-dir ./dist"
+  },
+  "author": "keshav kumar",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel": "^2.12.0"
+  }
+}
