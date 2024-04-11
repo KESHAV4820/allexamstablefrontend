@@ -175,7 +175,8 @@
       .dropdown:hover .dropdown-content {
         display: block;
 
-        max-height: 12.625rem; /* Set max-height to allow for content to appear */
+        max-height: 9rem;
+        /* 12.625rem; Set max-height to allow for content to appear */
         opacity: 1; /* Fade in the contents */
       }
   
