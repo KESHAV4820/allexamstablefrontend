@@ -1,9 +1,9 @@
 'use strict'
 
 
-const container= document.querySelector('.container');
 const clearButton=document.querySelector('.btn__2');
-
+/* this part of the code is being silenced for now becouse it isn't working as it was woking for the local server. After deployment, the DOMUpdating algo isn't working properly. Hence it is left to work upon. But for now, for illustration purpose, we arer going to use location.reload() once the clear button is pressed. 
+const container= document.querySelector('.container');
 function _clearContainer(){container.innerHTML='';};
 // _clear(){this._parentElement.innerHTML='';};inspiration code
 
@@ -126,14 +126,15 @@ function _generateHTMLContent() {
     </div>`;
     return originalHtmlMarkup;
   }
-  
+  */
   
   // Add click event listener to the "Clear" button
   clearButton.addEventListener('click', function() {
-    _clearContainer();
+   // _clearContainer();
     // Reset the HTML markup in the container
     // Replace the content of the container with the generated HTML content
-    container.innerHTML = _generateHTMLContent();
+    //container.innerHTML = _generateHTMLContent();
+    location.reload();
   });
   
 
