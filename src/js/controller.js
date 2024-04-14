@@ -5,9 +5,13 @@ const selectedValues = []; // Array to store selected values
 let allSelected = false; // Flag to track if all dropdowns have selections
 
 const dropdownContainers = document.querySelectorAll('.dropdown-container .dropdown');
+//Code Testing console.log(`${Array.from(dropdownContainers)}`);
+
 
 dropdownContainers.forEach(dropdown => {
   const span = dropdown.querySelector('.selected-value');
+  console.log(`${span}`);
+  
   const content = dropdown.querySelector('.dropdown-content');
 
   content.addEventListener('click', (event) => {
