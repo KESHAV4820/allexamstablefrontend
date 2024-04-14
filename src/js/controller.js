@@ -1,36 +1,42 @@
 'use strict';
 
+/* --------for collecting the outputs of all dropdown menu---------- */
+const selectedValues = []; // Array to store selected values
+let allSelected = false; // Flag to track if all dropdowns have selections
 
-const selectedValues = [];
-const dropdowns = document.querySelectorAll('.dropdown-content');
-dropdowns.forEach((dropdown) => {
-    console.log(`${dropdown.textContent}`);   
-});//Code Testing
-// const dropdowns1= document.querySelectorAll('.dropdown');
-// dropdowns1.forEach(dropdown1=>console.log(`${dropdown1.textContent}`));//Code Testing
+const dropdownContainers = document.querySelectorAll('.dropdown-container .dropdown');
+
+dropdownContainers.forEach(dropdown => {
+  const span = dropdown.querySelector('.selected-value');
+  const content = dropdown.querySelector('.dropdown-content');
+
+  content.addEventListener('click', (event) => {
+    event.preventDefault(); // Prevent default link behavior
+
+    const clickedValue = event.target.textContent;
+    span.textContent = clickedValue;
+
+    // Update selectedValues array
+    const dropdownIndex = dropdown.classList[1].split('__')[1];
+    selectedValues[dropdownIndex - 1] = clickedValue;
+
+    // Check if all dropdowns have selections
+    allSelected = selectedValues.every(value => value !== undefined);
+    updateOKButtonState();
+  });
+});
 
 const okButton = document.querySelector('.btn__1');
 
-// Function to handle the button click event
-function handleButtonClick() {
-    dropdowns.forEach(function(dropdown) {
-      const selectedOption = dropdown.querySelector('a[href="#"]:checked');
-      console.log(`Selected Option is ${selectedOption}`); // Code Testing
-      
-      if (selectedOption) {
-        selectedValues.push(selectedOption.getAttribute('data-value'));
-      }
-      if(!selectedOption){console.log(`No option selected in ${dropdown.innerText}`);
-      }
-    });
-    const queryString = selectedValues.join(', ');//code upgrade needed to use template of SQL based string that will be used in here to make a valied quary which will be sent to the postgres.
-    console.log(`Query String: ${queryString}`);
-  }
-  
-  // Attach click event listener to the OK button
-  document.addEventListener('DOMContentLoaded', function() {
-    okButton.addEventListener('click', handleButtonClick);
-  });
+function updateOKButtonState() {
+  okButton.disabled = !allSelected;
+}
+
+updateOKButtonState(); // Initial button state based on existing selections
+
+okButton.addEventListener('click', () => {
+  console.log('Selected Values:', selectedValues.join(', '));
+});
 
 
 
@@ -39,10 +45,8 @@ function handleButtonClick() {
 
 
 
-
-
-
-
+/************to implement the dropdown menu selected view************/
+export async function initializeDropdowns(){
   // Get all dropdowns
 const dropdownSelect = document.querySelectorAll('.dropdown');
 
@@ -73,9 +77,11 @@ dropdownSelect.forEach(dropdown => {
       }
 
       // Hide dropdown content after an option is clicked
-      dropdown.querySelector('.dropdown-content').classList.remove('show');
+      dropdown.querySelector('.dropdown-content')?.classList.remove('show');
     });
   });
 });
-
+};
+//Call the initializeDropDowns function initially
+initializeDropdowns();
   

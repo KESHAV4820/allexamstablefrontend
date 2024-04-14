@@ -61,21 +61,23 @@
         box-shadow: 0.54rem 0.54rem 0.675rem rgba(0, 0, 0, 0.589); /* Add shadow effect */
         margin-left: 2.7rem;
     }
+    .dropdown-container{
+      grid-area: 3/1/9/2;      
+    }
     .dropdown__1{
-        grid-area: 4/1/5/2; /*edit these values after launch. Note*/
-        
+        grid-area: 4/1/5/2;        
     }
     .dropdown__2{
         grid-area: 5/1/6/2;
-    }
+      }
+      .dropdown__3{
+          /* grid-area: 6/1/7/2; */
+          grid-area: 7/1/8/2;
+      }
     .dropdown__4{
       /* grid-area: 7/1/8/2; */
       grid-area: 6/1/7/2;
-  }
-    .dropdown__3{
-        /* grid-area: 6/1/7/2; */
-        grid-area: 7/1/8/2;
-    }
+      }
 
     .btn__1{
         grid-area: 8/1/9/2;
@@ -131,12 +133,20 @@
       }
   
       /* Dropdown Menu Styles */
+      .dropdown-container {
+        position: relative;
+        /* display: inline-block; */
+        /* display: inline; */
+        display: contents;
+        width: 10.1rem;        
+      }
       .dropdown {
         position: relative;
         /* display: inline-block; */
         display: inline;
-        box-shadow: 0.54rem 0.54rem 0.675rem rgba(0, 0, 0, 0.589);
+        /* box-shadow: 0.54rem 0.54rem 0.675rem rgba(0, 0, 0, 0.589); this was making it darker becouse somehow, it isn't working on full body, only the downward edge and when mixed with shadow of dropdown span{} it becomes even more dark.*/
         width: 10.1rem;
+        
       }
 
       /* Style for the dropdown trigger */
@@ -151,7 +161,7 @@
         min-width: 6.943rem;
         width: 10.1rem;
         background-color: #f1f1f1;
-        box-shadow: 0 0.5rem 1rem 0 rgba(0,0,0,0.2);
+        /* box-shadow: 0 0.5rem 1rem 0 rgba(0,0,0,0.2); */
         padding: 0.7575rem 0;
         text-align: left;
         max-height: 12.625rem;
@@ -168,6 +178,7 @@
         padding: 0.75rem 1.01rem;
         text-decoration: none;
         display: block;
+        
       }
   
       .dropdown-content a:hover {
@@ -180,30 +191,49 @@
         max-height: 9rem;
         /* 12.625rem; Set max-height to allow for content to appear */
         opacity: 1; /* Fade in the contents */
+        box-shadow: 0.54rem 0.54rem 0.675rem rgba(0, 0, 0, 0.589);
       }
   
       .dropdown > span {
         display: inline-block;
-        width: 7.3225rem;
+        width: 6.3225rem;
+        height: 0.41rem;/*this sets y coordinate length of dropdown button in idle state*/
         padding: 0.7575rem 1.515rem;
+        padding-bottom: 1.9rem;
+        padding-top: 0.9rem;
+        margin-top: 0.55rem;
+        /* margin-bottom: 0.45rem;Never set this value. YOu won't be able to select your options from dropdown menu😂 */
         font-size: 1.01rem;
         font-weight: bold;
-        text-align: center;
+        text-align:left;
         text-decoration: none;
         background-color: #50d6ee75;
         color: #000000;
+        overflow-y: hidden;
         border: none;
         border-radius: 0.2525rem;
         cursor: pointer;
         transition: background-color 0.3s ease;
+        box-shadow: 0.54rem 0.54rem 0.675rem rgba(0, 0, 0, 0.589);
       }
+      /* .selected-value {
+        display: inline-block; 
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      } */
   
       .dropdown > span:hover {
         background-color: #65f5fa;
+        width: 6.3225rem;
+        height: 0.41rem;
       }
   
       .dropdown > span:focus {
         outline: none;
+        width: 6.3225rem;
+        height: 0.99rem;
         box-shadow: 0 0 0 0.189rem rgba(0, 123, 255, 0.5);
       }
     
@@ -214,6 +244,7 @@
         /* display: inline-block; */
         display: inline;
         padding: 0.7575rem 1.515rem;
+        margin-top: 0.6rem;
         font-size: 1.01rem;
         font-weight: bold;
         text-align: center;
