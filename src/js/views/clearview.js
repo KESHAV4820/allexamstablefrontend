@@ -1,6 +1,6 @@
 'use strict'
 
-import { initializeDropdowns } from "../controller.js"; 
+ //import { initializeDropdowns } from "../controller.js"; 
 
 
 
@@ -80,19 +80,20 @@ function resetPage() {
     resetPage();
   });
   */
-
+/*👀uncomment from here.
   // Select the Clear button
 const clearButton = document.querySelector('.btn.btn__2');
 
 // Add event listener to the Clear button
-clearButton.addEventListener('click', function() {
-  // Select the container div
+clearButton.addEventListener('click', function(e) {
+  e.preventDefault();
+    // Select the container div
   const container = document.querySelector('.container');
 
   // Remove all child elements from the container
   while (container.firstChild) {
     container.removeChild(container.firstChild);
-    console.log(`${container.firstChild}`);//Code Testing
+    //console.log(`${container.firstChild}`);//Code Testing
     
   }
 
@@ -143,7 +144,7 @@ clearButton.addEventListener('click', function() {
     </div>
   </div>
 
-  <div class="dropdown  dropdown__3">
+  <div class="dropdown  dropdown__4">
     <span class="selected_value">CRITERIA</span>
     <div class="dropdown-content">
       <a href="#">OVERALL</a>
@@ -161,7 +162,7 @@ clearButton.addEventListener('click', function() {
     </div>
   </div>
 
-  <div class="dropdown dropdown__4">
+  <div class="dropdown dropdown__3">
     <span class="selected_value">CATAGORY</span>
     <div class="dropdown-content">
       <a href="#">GENERAL</a>
@@ -224,4 +225,81 @@ clearButton.addEventListener('click', function() {
   `;
   // reinitialize dropdown event Listeners after clearing the content
   initializeDropdowns();
+});
+*/
+
+
+
+
+/*👀uncomment from here
+
+const clearButton = document.querySelector('.btn__2'); // Assuming the clear button has class 'btn__1'
+
+clearButton.addEventListener('click', () => {
+  // Reset dropdown selections
+  const dropdownContents = document.querySelectorAll('.dropdown-content');
+  dropdownContents.forEach(content => {
+    content.querySelector('a:first-child').click(); // Click the first option (usually "ALL") to reset
+  });
+
+  // Reset selected values array (if applicable)
+  const selectedValues = []; // Assuming you have an array to store selections
+  selectedValues.length = 0; // Clear the array
+
+  // Reset "OK" button state (if applicable)
+  const okButton = document.querySelector('.btn'); // Assuming the OK button has class 'btn'
+  okButton.disabled = true; // Disable the OK button if applicable
+});
+
+*/
+
+/*👀uncomment from here
+
+const clearButton = document.querySelector('.btn__2'); // Assuming the clear button has class 'btn__2'
+
+clearButton.addEventListener('click', () => {
+  // Reset dropdown selections
+  const selectedValues = document.querySelectorAll('.selected-value');
+
+  selectedValues.forEach(span => {
+    // Get the default text content from the span's dataset (if available)
+    const defaultText = span.dataset.defaultValue || "ALL"; // Default to "ALL" if no dataset is set
+
+    span.textContent = defaultText;
+  });
+
+  // Reset selected values array (if applicable)
+  const selectedValuesArray = []; // Assuming you have an array to store selections
+  selectedValuesArray.length = 0; // Clear the array
+
+  // Reset "OK" button state (if applicable)
+  const okButton = document.querySelector('.btn'); // Assuming the OK button has class 'btn'
+  okButton.disabled = true; // Disable the OK button if applicable
+});
+*/
+import { selectedValues } from "../controller.js";
+
+const selectedValuesSpan = document.querySelectorAll('.selected-value');
+const initialValues = [];
+
+selectedValuesSpan.forEach(span => {
+  initialValues.push(span.textContent);
+});
+
+const clearButton = document.querySelector('.btn__2');
+
+clearButton.addEventListener('click', () => {
+  
+  const selectedValuesSpan = document.querySelectorAll('.selected-value');
+
+  selectedValuesSpan.forEach((span, index) => {
+    span.textContent = initialValues[index];
+  });
+
+  // Reset selected values array which is selectedValues array in controller.js
+  selectedValues.length = 0; // Clearing the array
+
+  // // Reset "OK" button state 
+  // const okButton = document.querySelector('.btn__1');
+  // okButton.disabled = true; // Disable the OK button if applicable
 });
