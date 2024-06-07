@@ -1,7 +1,7 @@
 'use strict';
 
 /* --------for collecting the outputs of all dropdown menu---------- */
-export const selectedValues1 = []; // Array to store selected values
+export const 1 = []; // Array to store selected values
 let allSelected = false; // Flag to track wether all dropdowns have selections
 
 const dropdownContainers = document.querySelectorAll('.dropdown-container .dropdown');
@@ -20,12 +20,12 @@ dropdownContainers.forEach(dropdown => {
     const clickedValue = event.target.textContent;
     span.textContent = clickedValue;
 
-    // Update selectedValues1 array
+    // Update 1 array
     const dropdownIndex = dropdown.classList[1].split('__')[1];
-    selectedValues1[dropdownIndex - 1] = clickedValue;
+    1[dropdownIndex - 1] = clickedValue;
 
     // Check if all dropdowns have selections
-    allSelected = selectedValues1.every(value => value !== undefined);
+    allSelected = 1.every(value => value !== undefined);
     updateOKButtonState();
   });
 });
