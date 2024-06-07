@@ -44,50 +44,25 @@ okButton.addEventListener('click', () => {
 
 
 
-/*----------for printview-------------- */
+/*----------for downloadview-------------- */
 
-import printJS from "print-js";
+const downloadview = document.querySelector('.btn__3');
 
-const printButton = document.querySelector('.btn__3');
+function downloadData() {
+  fetch('/download') //Note:Replace with your actual API endpoint
+    .then(response => response.json())
+    .then(data => {
+      console.log("Download triggered successfully:", data);})
+    .catch(error => {
+      console.error("Error triggering download:", error);
+    });
+}
 
-/*
-printButton.addEventListener('click', (e) => {
+downloadview.addEventListener('click', (e) => {
   // Get the content of the .databaseoutputarea div
   e.preventDefault();
-  const databaseOutputArea = document.querySelector('.databaseoutputarea').innerHTML;
-  const printWindow = window.open('', '', 'height=800,width=1200');// Creating new window object. Knowledge Gap need to work on the first two parameters. Resolved: now i know every thing about all the three parameters of window.open().🐱‍🏍
-  // Write the HTML content to the new window
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Print Output</title>
-        <style>
-          <!--Add any necessary styles for the print view -->
-        </style>
-      </head>
-      <body>
-        ${databaseOutputArea}
-      </body>
-    </html>
-  `);
-  printWindow.document.close();// After printing the content of the print windows, you have to explicitly close the print window using close() method.
-  printWindow.print();
-
-  printWindow.close();
+  downloadData();
 });
-*/
-
-
-const databaseOutputArea = document.getElementById('databaseoutputarea');
-
-  printButton.addEventListener('click', () => {
-    printJS({
-      printable: databaseOutputArea, // Specify the element to print
-      type: 'html', // Print as HTML (other options include 'pdf', 'image', 'json')
-      style: '@media print { /* Add custom print styles here */ }' // Optional custom print styles
-    });
-  });
 
 
 
@@ -100,45 +75,49 @@ const databaseOutputArea = document.getElementById('databaseoutputarea');
 
 
 
-/**********to implement the dropdown menu selected view************/
-/* Usless Coding 
-export async function initializeDropdowns(){
-  // Get all dropdowns
-const dropdownSelect = document.querySelectorAll('.dropdown');
+/*------------attempting database connection */
 
-//Iterate over each dropdown
-dropdownSelect.forEach(dropdown => {
-  // Get the dropdown trigger and options
-  const trigger = dropdown.querySelector('span');
-  const options = dropdown.querySelectorAll('.dropdown-content a');
+const pgpromise = require('pg-promise')({ /* Initialization options */ });
 
-  // Check if trigger exists
-  if (trigger) {
-    // Add click event listener to the dropdown trigger
-    trigger.addEventListener('click', function() {
-      // Toggle dropdown content visibility when the trigger is clicked
-      dropdown.querySelector('.dropdown-content').classList.toggle('show');
-    });
+const connectionString = 'postgres://your_username:your_password@your_host:your_port/your_database'; // Replace with your connection details
+
+const downloadData = async () => {
+  // Get user selections (replace with your logic)
+  const filter = document.getElementById('filter').value;
+
+  let query = 'SELECT * FROM student_finance';
+  if (filter !== 'all') {
+    query += ' WHERE status = $1';
   }
 
-  // Add click event listener to each option
-  options.forEach(option => {
-    option.addEventListener('click', function() {
-      // Get the text content of the selected option
-      const selectedOption = option.textContent;
+  try {
+    const db = pgpromise(connectionString);
+    const data = await db.any(query, (filter !== 'all') ? ['passed'] : []);
 
-      // Update the text content of the dropdown trigger with the selected option
-      if (trigger) {
-        trigger.textContent = selectedOption;
-      }
-
-      // Hide dropdown content after an option is clicked
-      dropdown.querySelector('.dropdown-content')?.classList.remove('show');
+    // Convert data to CSV format (replace with your preferred format)
+    let csvContent = 'Aadharcard,Roll_number,Pan_card,Student_Name\n';
+    data.forEach(row => {
+      csvContent += `${row.Aadharcard},${row.Roll_number},${row.Pan_card},${row.Student_Name}\n`;
     });
-  });
-});
+
+    // Create a downloadable blob (binary large object)
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+
+    // Simulate a click on a downloadable link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'student_data.csv';
+    link.click();
+
+    // Cleanup the temporary URL
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error downloading data:', error);
+    // Handle errors gracefully (e.g., display an error message to the user)
+  }
 };
-//Call the initializeDropDowns function initially
-initializeDropdowns();
-*/
+
+
+
   
