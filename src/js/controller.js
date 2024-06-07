@@ -77,46 +77,46 @@ downloadview.addEventListener('click', (e) => {
 
 /*------------attempting database connection */
 
-const pgpromise = require('pg-promise')({ /* Initialization options */ });
+// const pgpromise = require('pg-promise')({ /* Initialization options */ });
 
-const connectionString = 'postgres://your_username:your_password@your_host:your_port/your_database'; // Replace with your connection details
+// const connectionString = 'postgres://your_username:your_password@your_host:your_port/your_database'; // Replace with your connection details
 
-const downloadData = async () => {
-  // Get user selections (replace with your logic)
-  const filter = document.getElementById('filter').value;
+// const downloadData = async () => {
+//   // Get user selections (replace with your logic)
+//   const filter = document.getElementById('filter').value;
 
-  let query = 'SELECT * FROM student_finance';
-  if (filter !== 'all') {
-    query += ' WHERE status = $1';
-  }
+//   let query = 'SELECT * FROM student_finance';
+//   if (filter !== 'all') {
+//     query += ' WHERE status = $1';
+//   }
 
-  try {
-    const db = pgpromise(connectionString);
-    const data = await db.any(query, (filter !== 'all') ? ['passed'] : []);
+//   try {
+//     const db = pgpromise(connectionString);
+//     const data = await db.any(query, (filter !== 'all') ? ['passed'] : []);
 
-    // Convert data to CSV format (replace with your preferred format)
-    let csvContent = 'Aadharcard,Roll_number,Pan_card,Student_Name\n';
-    data.forEach(row => {
-      csvContent += `${row.Aadharcard},${row.Roll_number},${row.Pan_card},${row.Student_Name}\n`;
-    });
+//     // Convert data to CSV format (replace with your preferred format)
+//     let csvContent = 'Aadharcard,Roll_number,Pan_card,Student_Name\n';
+//     data.forEach(row => {
+//       csvContent += `${row.Aadharcard},${row.Roll_number},${row.Pan_card},${row.Student_Name}\n`;
+//     });
 
-    // Create a downloadable blob (binary large object)
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
+//     // Create a downloadable blob (binary large object)
+//     const blob = new Blob([csvContent], { type: 'text/csv' });
+//     const url = window.URL.createObjectURL(blob);
 
-    // Simulate a click on a downloadable link
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'student_data.csv';
-    link.click();
+//     // Simulate a click on a downloadable link
+//     const link = document.createElement('a');
+//     link.href = url;
+//     link.download = 'student_data.csv';
+//     link.click();
 
-    // Cleanup the temporary URL
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Error downloading data:', error);
-    // Handle errors gracefully (e.g., display an error message to the user)
-  }
-};
+//     // Cleanup the temporary URL
+//     window.URL.revokeObjectURL(url);
+//   } catch (error) {
+//     console.error('Error downloading data:', error);
+//     // Handle errors gracefully (e.g., display an error message to the user)
+//   }
+// };
 
 
 
