@@ -85,10 +85,12 @@
 
     .btn__1{
         grid-area: 10/1/11/2;
+        width: 6.3125rem;
     }
     .btn__2{
         grid-area:  12/1/13/2;
         /* margin-left: 2.3625rem; */
+        width: 6.3125rem;
     }
     .btn__3{
         grid-area: 14/1/15/2;
@@ -261,7 +263,7 @@
         cursor: pointer;
         transition: background-color 0.3s ease;
         /* min-width: auto; Set min-width to auto to prevent stretching */
-        width: 6.3125rem;
+        /* width: 6.3125rem; */
 
         box-shadow: 0.505rem 0.505rem 0.631rem rgba(0, 0, 0, 0.589);
     }
