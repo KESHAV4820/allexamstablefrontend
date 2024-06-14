@@ -100,7 +100,7 @@
         text-align: right;
     }
     .summarytable{
-        grid-area: 8/4/20/10;
+        grid-area: 9/4/20/10;
         align-content: stretch;
         justify-content: stretch;
     }
