@@ -88,12 +88,12 @@
         width: 6.3125rem;
     }
     .btn__2{
-        grid-area:  12/1/13/2;
+        grid-area:  11/1/12/2;
         /* margin-left: 2.3625rem; */
         width: 6.3125rem;
     }
     .btn__3{
-        grid-area: 14/1/15/2;
+        grid-area: 13/1/14/2;
         width: 9.3125rem;
     }
     .stats{
