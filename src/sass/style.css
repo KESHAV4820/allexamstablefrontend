@@ -88,7 +88,7 @@
     }
     .btn__2{
         grid-area:  12/1/13/2;
-        margin-left: 2.3625rem;
+        /* margin-left: 2.3625rem; */
     }
     .btn__3{
         grid-area: 15/1/16/2;
