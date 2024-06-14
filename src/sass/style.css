@@ -92,6 +92,7 @@
     }
     .btn__3{
         grid-area: 14/1/15/2;
+        width: 7.3125rem;
     }
     .stats{
         grid-area: 8/3/9/4;
