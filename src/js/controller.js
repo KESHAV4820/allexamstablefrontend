@@ -45,14 +45,12 @@ okButton.addEventListener('click', () => {
 });
 
 */
-
 'use strict';
 
 export const selectedValues = {
   EXAMNAME: "",
   CAT1: "",
-  //CRITERIA: "",
-  SELECTED:"",
+  SELECTED: "",
   GENDER: "",
   CAT2: "",
   CAT3: ""
@@ -63,8 +61,7 @@ const dropdownContainers = document.querySelectorAll('.dropdown-container .dropd
 const parameterMap = {
   '1': 'EXAMNAME',
   '2': 'CAT1',
-  //'3': 'CRITERIA',
-  '3':'SELECTED',
+  '3': 'SELECTED',
   '4': 'GENDER',
   '5': 'CAT2',
   '6': 'CAT3'
@@ -91,14 +88,14 @@ dropdownContainers.forEach(dropdown => {
 const okButton = document.querySelector('.btn__1');
 
 function updateOKButtonState() {
-  // Enable OK button as soon as any dropdown is selected
   okButton.disabled = Object.values(selectedValues).every(value => value === "");
 }
 
 updateOKButtonState();
 
 okButton.addEventListener('click', () => {
-  const lockedSelectedValues = JSON.stringify(selectedValues, null, 2);
+  const outputValues = {...selectedValues}; // Create a shallow copy
+  const lockedSelectedValues = JSON.stringify(outputValues, null, 2);
   console.log('Selected Values:', lockedSelectedValues);
 });
 
