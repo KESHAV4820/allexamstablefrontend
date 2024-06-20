@@ -63,7 +63,8 @@ const dropdownContainers = document.querySelectorAll('.dropdown-container .dropd
 const parameterMap = {
   '1': 'EXAMNAME',
   '2': 'CAT1',
-  '3': 'CRITERIA',
+  //'3': 'CRITERIA',
+  '3':'SELECTED',
   '4': 'GENDER',
   '5': 'CAT2',
   '6': 'CAT3'
