@@ -121,8 +121,70 @@ function updateOKButtonState() {
 
 updateOKButtonState();
 
-okButton.addEventListener('click', () => {
-  const outputValues = {
+// okButton.addEventListener('click', (e) => {
+  //   e.preventDefault();
+//   const outputValues = {
+//     EXAMNAME: selectedValues.EXAMNAME,
+//     CAT1: selectedValues.CAT1,
+//     SELECTED: selectedValues.SELECTED,
+//     GENDER: selectedValues.GENDER,
+//     CAT2: selectedValues.CAT2,
+//     CAT3: selectedValues.CAT3
+//   };
+//   const lockedSelectedValues = JSON.stringify(outputValues, null, 2);
+//   console.log('Selected Values:', lockedSelectedValues);// Code Testing
+// });
+
+// Clear button functionality
+// const clearButton = document.querySelector('.btn__2');
+// clearButton.addEventListener('click', (e) => {
+  //   e.preventDefault();
+//   dropdownContainers.forEach(dropdown => {
+//     const span = dropdown.querySelector('.selected-value');
+//     span.textContent = span.getAttribute('data-default') || span.textContent;
+//   });
+  
+//   Object.keys(selectedValues).forEach(key => selectedValues[key] = "");
+//   updateOKButtonState();
+// });
+
+// Initialize default values for spans
+dropdownContainers.forEach(dropdown => {
+  const span = dropdown.querySelector('.selected-value');
+  span.setAttribute('data-default', span.textContent);
+});
+//Code Testing console.log(selectedValues);//Output: {EXAMNAME: '', CAT1: '', SELECTED: '', GENDER: '', CAT2: '', …}
+
+export { selectedValues };
+
+
+
+
+
+//---- the function that will use the fetch function for API endpointVIE💀☠⚡----
+async function fetchRecordCount(parameterObjData) {
+  try {
+    const response = await fetch('http://127.0.0.1:3000/api/v1/recordcount', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(parameterObjData),//💀Super i forgot to stringify the raw data input stream. Hence it was giving error. Don't do it agian.⚡
+    });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+}
+
+// to call fetchRecordCount() function every time i press OK button. Actually to set the value in the "<span></span>" element. 
+okButton.addEventListener('click', async (e) => {
+  e.preventDefault();
+  const parameterSendingToApi = {
     EXAMNAME: selectedValues.EXAMNAME,
     CAT1: selectedValues.CAT1,
     SELECTED: selectedValues.SELECTED,
@@ -130,48 +192,30 @@ okButton.addEventListener('click', () => {
     CAT2: selectedValues.CAT2,
     CAT3: selectedValues.CAT3
   };
-  const lockedSelectedValues = JSON.stringify(outputValues, null, 2);
-  console.log('Selected Values:', lockedSelectedValues);
+  
+  const recordCount = await fetchRecordCount(parameterSendingToApi);
+  if (recordCount !== null) {
+    document.getElementById('recordsOfData').textContent = recordCount;
+  } else {
+    console.error('fetch record count is not working. This error is comming from LOC 199 around');
+  }
 });
 
-// Clear button functionality
+// similarly new CLEAR button functionaliyt
 const clearButton = document.querySelector('.btn__2');
-clearButton.addEventListener('click', () => {
+clearButton.addEventListener('click', (e) => {
+  e.preventDefault();
   dropdownContainers.forEach(dropdown => {
     const span = dropdown.querySelector('.selected-value');
     span.textContent = span.getAttribute('data-default') || span.textContent;
   });
-  
+ 
   Object.keys(selectedValues).forEach(key => selectedValues[key] = "");
   updateOKButtonState();
-});
-
-// Initialize default values for spans
-dropdownContainers.forEach(dropdown => {
-  const span = dropdown.querySelector('.selected-value');
-  span.setAttribute('data-default', span.textContent);
-});
-
-export { selectedValues };
-/*----------for downloadview-------------- */
-
-const downloadview = document.querySelector('.btn__3');
-
-function downloadData() {
-  fetch('/download') //Note:Replace with your actual API endpoint
-    .then(response => response.json())
-    .then(data => {
-      console.log("Download triggered successfully:", data);})
-    .catch(error => {
-      console.error("Error triggering download:", error);
-    });
-}
-
-downloadview.addEventListener('click', (e) => {
-  // Get the content of the .databaseoutputarea div
-  e.preventDefault();
-  downloadData();
-});
-
-
   
+  // to Reset the record if count is found to be 0
+  document.getElementById('recordsOfData').textContent = '0';
+});
+
+// to initialize the span with value 0 every time page loads. looks neat. 
+document.getElementById('recordsOfData').textContent = '0';
