@@ -107,13 +107,16 @@
     .dropdown__6{
       grid-area: 9/1/10/2;
       }
+    .dropdown__7{
+      grid-area: 10/1/11/2;
+      }
 
     .btn__1{/*OK*/
-        grid-area: 10/1/11/2;
+        grid-area: 11/1/12/2;
         width: 6.3125rem;
     }
     .btn__2{/*CLEAR*/
-        grid-area:  11/1/12/2;
+        grid-area:  12/1/13/2;
         /* margin-left: 2.3625rem; */
         width: 6.3125rem;
     }
