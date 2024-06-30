@@ -6,6 +6,73 @@ const selectedValues = {};
 
 const dropdownContainers = document.querySelectorAll('.dropdown-container .dropdown');
 
+const examApplicants = {
+  'AWO/TPO-2022': 549497,
+  'CAPF-2016': 694227,
+  'CAPF-2017': 729596,
+  'CAPF-2018': 823730,
+  'CAPF-2019': 673292,
+  'CAPF-2020': 674366,
+  'CAPF-2022': 727110,
+  'CAPF-2023': 'N/A',  // No data provided
+  'CGL-2016': 3803748,
+  'CGL-2017': 2928826,
+  'CGL-2018': 2597431,
+  'CGL-2019': 2177843,
+  'CGL-2020': 2209867,
+  'CGL-2021': 1963324,
+  'CGL-2022': 3355194,
+  'CGL-2023': 'N/A',  // No data provided
+  'CHSL-2017': 6111719,
+  'CHSL-2018': 2968655,
+  'CHSL-2019': 4168750,
+  'CHSL-2020': 3898378,
+  'CHSL-2021': 3669524,
+  'CHSL-2022': 3197965,
+  'CHSL-2023': 'N/A',  // No data provided
+  'CONSTABLE-2018': 5236810,
+  'CONSTABLE-2021': 7174579,
+  'CONSTABLE-2022': 5359277,
+  'DPCST-2016': 195860,
+  'DPCST-2020': 2896045,
+  'DPCST-2023': 'N/A',  // No data provided
+  'DPDVR-2022': 194704,
+  'HC(MIN)IN DP-2022': 2228593,
+  'IMD-2017': 475093,
+  'JE-2016': 622041,
+  'JE-2017': 995350,
+  'JE-2018': 813622,
+  'JE-2019': 806078,
+  'JE-2020': 667589,
+  'JE-2022': 600775,
+  'JE-2023': 'N/A',  // No data provided
+  'JHT-2016': 25298,
+  'JHT-2017': 29131,
+  'JHT-2018': 49651,
+  'JHT-2019': 89821,
+  'JHT-2020': 13515,
+  'JHT-2022': 9444,
+  'JHT-2023': 'N/A',  // No data provided
+  'LDC-D-2017': 'N/A',  // No data provided
+  'LDC-D-2018': 958,
+  'MTS-2016': 6975285,
+  'MTS-2019': 3869446,
+  'MTS-2020': 4534810,
+  'MTS-2021': 3797357,
+  'MTS-2022': 'N/A',  // No data provided
+  'MTS-2023': 'N/A',  // No data provided
+  'SA_IMD-2022': 241276,
+  'STENO-2016': 457680,
+  'STENO-2017': 541900,
+  'STENO-2018': 438905,
+  'STENO-2019': 513597,
+  'STENO-2020': 512172,
+  'STENO-2022': 498884,
+  'STENO-2023': 'N/A',  // No data provided
+  'STENO-D-2017': 435,
+  'UDC-D-2017': 80
+};// in absence of data in database, we decided to hardcode the number of applicants for each exam. So we are putting the data in the script. 
+
 const parameterMap = {
   '1': 'EXAMNAME',
   '2': 'CAT1',
@@ -47,10 +114,10 @@ function updateOKButtonState() {
 
 updateOKButtonState();
 
-// okButton.addEventListener('click', () => {
-//   const lockedSelectedValues = JSON.stringify(selectedValues, null, 2);
-//   console.log('Selected Values:', lockedSelectedValues);
-// });
+okButton.addEventListener('click', () => {
+  const lockedSelectedValues = JSON.stringify(selectedValues, null, 2);
+  console.log('Selected Values:', lockedSelectedValues);
+});// VIESuper to check inputs comming from frontend. 
 
 // Clear button functionality
 // const clearButton = document.querySelector('.btn__2');
@@ -114,6 +181,10 @@ okButton.addEventListener('click', async (e) => {
   } else {
     console.error('fetch record count is not working. This error is comming from LOC 199 around');
   }
+
+  // Update the number of applicants
+  const applicantCount = examApplicants[selectedValues.EXAMNAME] || 0;
+  document.getElementById('noOfApplicant').textContent = applicantCount;
 });
 
 // similarly new CLEAR button functionaliyt
@@ -130,6 +201,7 @@ clearButton.addEventListener('click', (e) => {
   
   // to Reset the record if count is found to be 0
   document.getElementById('recordsOfData').textContent = '0';
+  document.getElementById('noOfApplicant').textContent = '0';
 });
 // to initialize the span with value 0 every time page loads. looks neat. 
 document.getElementById('recordsOfData').textContent = '0';
