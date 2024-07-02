@@ -95,13 +95,10 @@ dropdownContainers.forEach(dropdown => {
 
     const dropdownIndex = dropdown.classList[1].split('__')[1];
     const parameterName = parameterMap[dropdownIndex];
-    
-    if (clickedValue !== null) {
-      selectedValues[parameterName] = clickedValue;
-    } else {
-      delete selectedValues[parameterName];
-    }
 
+    span.setAttribute('data-value', clickedValue);
+    span.setAttribute('data-param', parameterName);
+    
     updateOKButtonState();
   });
 });
@@ -109,27 +106,19 @@ dropdownContainers.forEach(dropdown => {
 const okButton = document.querySelector('.btn__1');
 
 function updateOKButtonState() {
-  okButton.disabled = Object.keys(selectedValues).length === 0;
+  const filledDropdowns = Array.from(dropdownContainers).filter(dropdown => 
+    dropdown.querySelector('.selected-value').getAttribute('data-value') !== null
+  );
+  okButton.disabled = filledDropdowns.length === 0;
 }
 
 updateOKButtonState();
 
 okButton.addEventListener('click', () => {
+
   const lockedSelectedValues = JSON.stringify(selectedValues, null, 2);
   console.log('Selected Values:', lockedSelectedValues);
 });// VIESuper to check inputs comming from frontend. 
-
-// Clear button functionality
-// const clearButton = document.querySelector('.btn__2');
-// clearButton.addEventListener('click', () => {
-//   dropdownContainers.forEach(dropdown => {
-//     const span = dropdown.querySelector('.selected-value');
-//     span.textContent = span.getAttribute('data-default') || span.textContent;
-//   });
-  
-//   Object.keys(selectedValues).forEach(key => delete selectedValues[key]);
-//   updateOKButtonState();
-// });
 
 // Initialize default values for spans
 dropdownContainers.forEach(dropdown => {
@@ -165,38 +154,40 @@ async function fetchRecordCount(parameterObjData) {
 // to call fetchRecordCount() function every time i press OK button. Actually to set the value in the "<span></span>" element. 
 okButton.addEventListener('click', async (e) => {
   e.preventDefault();
-  const parameterSendingToApi = {
-    EXAMNAME: selectedValues.EXAMNAME,
-    CAT1: selectedValues.CAT1,
-    SELECTED: selectedValues.SELECTED,
-    ALLOC_CAT:selectedValues.ALLOC_CAT,
-    GENDER: selectedValues.GENDER,
-    CAT2: selectedValues.CAT2,
-    CAT3: selectedValues.CAT3
-  };
-  
+  const parameterSendingToApi = {};
+  dropdownContainers.forEach(dropdown => {
+    const span = dropdown.querySelector('.selected-value');
+    const value = span.getAttribute('data-value');
+    const param = span.getAttribute('data-param');
+    if (value !== null && param !== null) {
+      parameterSendingToApi[param] = value;
+    }
+  });
+    console.log('Selected Values:', JSON.stringify(parameterSendingToApi, null, 2));
+
   const recordCount = await fetchRecordCount(parameterSendingToApi);
   if (recordCount !== null) {
     document.getElementById('recordsOfData').textContent = recordCount;
   } else {
-    console.error('fetch record count is not working. This error is comming from LOC 199 around');
+    console.error('fetch record count is not working. This error is comming from LOC 205 around');
   }
 
-  // Update the number of applicants
-  const applicantCount = examApplicants[selectedValues.EXAMNAME] || 0;
+  const applicantCount = examApplicants[parameterSendingToApi.EXAMNAME] || 0;
   document.getElementById('noOfApplicant').textContent = applicantCount;
 });
 
 // similarly new CLEAR button functionaliyt
 const clearButton = document.querySelector('.btn__2');
+
 clearButton.addEventListener('click', (e) => {
   e.preventDefault();
   dropdownContainers.forEach(dropdown => {
     const span = dropdown.querySelector('.selected-value');
     span.textContent = span.getAttribute('data-default') || span.textContent;
+    span.removeAttribute('data-value');
+    span.removeAttribute('data-param');
   });
   
-  Object.keys(selectedValues).forEach(key => selectedValues[key] = "");
   updateOKButtonState();
   
   // to Reset the record if count is found to be 0
@@ -711,15 +702,14 @@ async function downloadRecords(parameterObjData) {
     console.error('Error:', error);
     alert('Failed to download records. Please try again.');
   }
-}
+};//newly added
 
 downloadButton.addEventListener('click', async () => {
   const parameterSendingToApi = {...selectedValues};
   await downloadRecords(parameterSendingToApi);
 });
 
-
-/* Bug Found
+/* Bug Found legacy code 
 const downloadButton = document.querySelector('.btn__3');
 
 async function triggerDownload(parameterObjData) {
