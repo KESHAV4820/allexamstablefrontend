@@ -102,8 +102,8 @@ function updateExamCenters(cityStats) {
     cityItem.className = 'city-item';// basically it means <div class="city-item"></div>
     cityItem.innerHTML = `
       <h3 class="city-name">${city}</h3>
-      <p class="city-count">Count: <span>${data.count}</span></p>
-      <p class="city-percentage">Percentage of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
+      <p class="city-count">Candidates No: <span>${data.count}</span></p>
+      <p class="city-percentage">% of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
       <p class="city-per-lakh">Per Lakh: <span>${data.perLakh.toFixed(5)}</span></p>
     `;
     examCentersDiv.appendChild(cityItem);
