@@ -83,6 +83,40 @@ const parameterMap = {
   '7': 'CAT3',
 };
 
+// This is a function that will be used by the program to create template and enter the city names and their student counts.
+function updateExamCenters(cityStats) {
+  const examCentersDiv = document.querySelector('.examcenters');
+  
+  // Clearing the existing content. So nothing from previous use stay here.  
+  examCentersDiv.innerHTML = '';
+
+  //when there is no cities to display, show the placeholder image
+  if (Object.keys(cityStats).length === 0) {
+    resetExamCenters();
+    return;
+  }
+
+  // to create and appand city names and their counts
+  for (const [city, data] of Object.entries(cityStats)) {
+    const cityItem = document.createElement('div');
+    cityItem.className = 'city-item';// basically it means <div class="city-item"></div>
+    cityItem.innerHTML = `
+      <h3 class="city-name">${city}</h3>
+      <p class="city-count">Count: <span>${data.count}</span></p>
+      <p class="city-percentage">Percentage of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
+      <p class="city-per-lakh">Per Lakh: <span>${data.perLakh.toFixed(5)}</span></p>
+    `;
+    examCentersDiv.appendChild(cityItem);
+  }
+}
+
+// Function to reset exam centers and show placeholder image
+function resetExamCenters() {
+  const examCentersDiv = document.querySelector('.examcenters');
+  examCentersDiv.innerHTML = '<img src="src/img/testing.png" alt="Logo" class="header__logo" />';
+}
+
+
 dropdownContainers.forEach(dropdown => {
   const span = dropdown.querySelector('.selected-value');
   const content = dropdown.querySelector('.dropdown-content');
@@ -149,6 +183,34 @@ async function fetchRecordCount(parameterObjData) {
     console.error('Error:', error);
     return null;
   }
+};
+
+// New async function to fetch venue statistics
+async function fetchVenueStat(parameterObjData) {
+  try {
+    const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=3000&offset=0', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(parameterObjData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    };
+
+    const data = await response.json();
+    if (data.records && data.records.city_stats) {
+      updateExamCenters(data.records.city_stats);
+    } else {
+      console.error('Unexpected data structure:', data);
+      resetExamCenters();
+    }
+  } catch (error) {
+    console.error('Error fetching city stats:', error);
+    resetExamCenters();
+  }
 }
 
 // to call fetchRecordCount() function every time i press OK button. Actually to set the value in the "<span></span>" element. 
@@ -174,6 +236,10 @@ okButton.addEventListener('click', async (e) => {
 
   const applicantCount = examApplicants[parameterSendingToApi.EXAMNAME] || 0;
   document.getElementById('noOfApplicant').textContent = applicantCount;
+
+  
+  // Fetching and update exam center stats
+  await fetchVenueStat(parameterSendingToApi);
 });
 
 // similarly new CLEAR button functionaliyt
@@ -193,9 +259,14 @@ clearButton.addEventListener('click', (e) => {
   // to Reset the record if count is found to be 0
   document.getElementById('recordsOfData').textContent = '0';
   document.getElementById('noOfApplicant').textContent = '0';
+
+  // reset exam centers and show placeholder image
+  resetExamCenters();
 });
 // to initialize the span with value 0 every time page loads. looks neat. 
 document.getElementById('recordsOfData').textContent = '0';
+// Calling resetExamCenters on page load to show the placeholder image initially
+document.addEventListener('DOMContentLoaded', resetExamCenters);
 
 
 //----- To Add Data View functionality. 
