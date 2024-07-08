@@ -266,7 +266,7 @@ clearButton.addEventListener('click', (e) => {
 // to initialize the span with value 0 every time page loads. looks neat. 
 document.getElementById('recordsOfData').textContent = '0';
 // Calling resetExamCenters on page load to show the placeholder image initially
-document.addEventListener('DOMContentLoaded', resetExamCenters);
+document.addEventListener('DOMContentLoaded',()=>{resetExamCenters();});
 
 
 //----- To Add Data View functionality. 
