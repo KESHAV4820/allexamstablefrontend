@@ -136,7 +136,7 @@ function updateStateExamCenters(state_Stats) {
 // Function to reset exam centers and show placeholder image
 function resetExamCenters() {
   const examCentersDiv = document.querySelector('.examcenters');
-  examCentersDiv.innerHTML = '<img src="/img/testing.png" alt="Logo" class="header__logo" />';
+  examCentersDiv.innerHTML = '<img src="/public/img/testing.png" alt="Logo" class="header__logo" />';
 }
 
 
