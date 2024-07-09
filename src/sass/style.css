@@ -1,6 +1,8 @@
     /* working on container*/
     .container{
         display: grid;
+        width: 98%;
+        height: 100%;
 
         /* grid-template-rows: 1fr, 1fr, 1fr, 1fr, 1fr, 1fr,1fr, 1fr, 1fr, 1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr;   20rows */
         grid-template-rows: auto auto auto;
