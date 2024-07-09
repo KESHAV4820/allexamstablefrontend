@@ -364,7 +364,8 @@
       gap: 20px;
       justify-content: flex-start;
       align-content: flex-start;
-      height: 400px; /* Set a fixed height */
+      height: 40vh;/*400px; Set a fixed height */
+      width: 90vw;/*900px; Set a fixed width */
       overflow-y: auto; /* Enable vertical scrolling */
       padding: 20px;
       background-color: #f0f0f0;

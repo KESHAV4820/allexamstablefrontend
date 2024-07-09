@@ -102,13 +102,36 @@ function updateExamCenters(cityStats) {
     cityItem.className = 'city-item';// basically it means <div class="city-item"></div>
     cityItem.innerHTML = `
       <h3 class="city-name">${city}</h3>
-      <p class="city-count">Candidates No: <span>${data.count}</span></p>
+      <p class="city-count">Candidates Count: <span>${data.count}</span></p>
       <p class="city-percentage">% of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
       <p class="city-per-lakh">Per Lakh: <span>${data.perLakh.toFixed(5)}</span></p>
     `;
     examCentersDiv.appendChild(cityItem);
   }
-}
+};
+
+function updateStateExamCenters(state_Stats) {
+  const examCentersDiv = document.querySelector('.examcenters');// this will remain the same for state or zone as it's the <div> where our city-item div or state-item div or zone-item div is present.
+
+  //when there is no state to display, show the placeholder image
+  if (Object.keys(state_Stats).length === 0) {
+    //resetExamCenters(); since this code is already there for centers, we don't need it for states.
+    return;
+  }
+
+  // to create and appand city names and their counts
+  for (const [stateName, data] of Object.entries(state_Stats)) {
+    const stateItem = document.createElement('div');
+    stateItem.className = 'state-item';// basically it means <div class="state-item"></div>
+    stateItem.innerHTML = `
+      <h3 class="city-name">${stateName}</h3>
+      <p class="city-count">Candidates Count: <span>${data.count}</span></p>
+      <p class="city-percentage">% of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
+      <p class="city-per-lakh">Per Lakh: <span>${data.perLakh.toFixed(5)}</span></p>
+    `;
+    examCentersDiv.appendChild(stateItem);
+  }
+};
 
 // Function to reset exam centers and show placeholder image
 function resetExamCenters() {
