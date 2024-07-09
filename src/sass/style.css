@@ -364,8 +364,8 @@
       gap: 20px;
       justify-content: flex-start;
       align-content: flex-start;
-      height: 40vh;/*400px; Set a fixed height */
-      width: 90vw;/*900px; Set a fixed width */
+      height: 400px;/*40vh; Set a fixed height */
+      width: 900px;/*90vw; Set a fixed width */
       overflow-y: auto; /* Enable vertical scrolling */
       padding: 20px;
       background-color: #f0f0f0;
@@ -373,7 +373,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    .city-item {
+    .city-item,.state-item {
       /* background-color:#1cf8af67; */
       background: linear-gradient(to bottom right, #ffffff, #1cf8af67);
       border-radius: 8px;
@@ -385,20 +385,20 @@
       transition: background-color 0.9s ease; /* Smooth transition */
     }
     
-    .city-name {
+    .city-name,.state-name {
       font-size: 18px;
       margin-bottom: 10px;
       color: #333;
     }
     
-    .city-count, .city-percentage, .city-per-lakh {
+    .city-count, .city-percentage, .city-per-lakh, .state-count, .state-percentage, .state-per-lakh {
       font-size: 14px;
       margin: 5px 0;
       color: #666;
     }
 
     /* Ensure the placeholder image is centered when no cities are displayed */
-    .examcenters img.header__logo {
+    .header__logo {
       display: block;
       margin: auto;
       position: relative;
