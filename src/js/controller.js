@@ -109,7 +109,7 @@ function updateExamCenters(cityStats) {
     examCentersDiv.appendChild(cityItem);
   }
 };
-
+/*
 function updateStateExamCenters(state_Stats) {
   const examCentersDiv = document.querySelector('.examcenters');// this will remain the same for state or zone as it's the <div> where our city-item div or state-item div or zone-item div is present.
 
@@ -124,14 +124,39 @@ function updateStateExamCenters(state_Stats) {
     const stateItem = document.createElement('div');
     stateItem.className = 'state-item';// basically it means <div class="state-item"></div>
     stateItem.innerHTML = `
-      <h3 class="city-name">${stateName}</h3>
-      <p class="city-count">Candidates Count: <span>${data.count}</span></p>
-      <p class="city-percentage">% of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
-      <p class="city-per-lakh">Per Lakh: <span>${data.perLakh.toFixed(5)}</span></p>
+      <h3 class="state-name">${stateName}</h3>
+      <p class="state-count">Candidates Count: <span>${data.count}</span></p>
+      <p class="state-percentage">% of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
+      <p class="state-per-lakh">Per Lakh: <span>${data.perLakh.toFixed(5)}</span></p>
     `;
     examCentersDiv.appendChild(stateItem);
   }
+};//newly added
+*/
+/*//newly added
+function updateZoneCenters(zoneStats) {
+  const examCentersDiv = document.querySelector('.examcenters');// this will remain the same for state or zone as it's the <div> where our city-item div or state-item div or zone-item div is present.
+
+  //when there is no state to display, show the placeholder image
+  if (Object.keys(zoneStats).length === 0) {
+    //resetExamCenters(); since this code is already there for centers, we don't need it for states.
+    return;
+  }
+
+  // to create and appand city names and their counts
+  for (const [zoneName, data] of Object.entries(zoneStats)) {
+    const zoneItem = document.createElement('div');
+    zoneItem.className = 'state-item';// basically it means <div class="state-item"></div>
+    zoneItem.innerHTML = `
+      <h3 class="state-name">${zoneName}</h3>
+      <p class="state-count">Candidates Count: <span>${data.count}</span></p>
+      <p class="state-percentage">% of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
+      <p class="state-per-lakh">Per Lakh: <span>${data.perLakh.toFixed(5)}</span></p>
+    `;
+    examCentersDiv.appendChild(zoneItem);
+  }
 };
+*/
 
 // Function to reset exam centers and show placeholder image
 function resetExamCenters() {
@@ -211,7 +236,7 @@ async function fetchRecordCount(parameterObjData) {
 // New async function to fetch venue statistics
 async function fetchVenueStat(parameterObjData) {
   try {
-    const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=3000&offset=0', {
+    const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=800000&offset=0', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -226,6 +251,8 @@ async function fetchVenueStat(parameterObjData) {
     const data = await response.json();
     if (data.records && data.records.city_stats) {
       updateExamCenters(data.records.city_stats);
+      updateStateExamCenters(data.records.state_stats);//newly added
+      updateZoneCenters(data.records.zone_stats);//newly added
     } else {
       console.error('Unexpected data structure:', data);
       resetExamCenters();
@@ -265,7 +292,7 @@ okButton.addEventListener('click', async (e) => {
   await fetchVenueStat(parameterSendingToApi);
 });
 
-// similarly new CLEAR button functionaliyt
+// similarly CLEAR button functionaliyt
 const clearButton = document.querySelector('.btn__2');
 
 clearButton.addEventListener('click', (e) => {
