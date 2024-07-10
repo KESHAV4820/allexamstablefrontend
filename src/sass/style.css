@@ -385,10 +385,11 @@
       border-radius: 8px;
       padding: 15px;
       width: calc(30% - 20px); /* Adjust width to fit 3 items per row, accounting for gap */
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 5px rgba(0,0,0,0.808);
       margin-bottom: 20px;
-      box-shadow: 0 0 0.72rem rgba(0, 0, 0, 0.808); /* Subtle shadow effect */
-      transition: background-color 0.9s ease; /* Smooth transition */
+      /* box-shadow: 0 0 0.72rem rgba(0, 0, 0, 0.808); */
+      transition: background-color 0.9s ease;
+      
     }
     
     .city-name,.state-name {
