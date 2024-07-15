@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../allexamstable_backend_project"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "allexamstable project"
+	}
+}
