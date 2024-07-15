@@ -254,7 +254,7 @@ async function fetchVenueStat(parameterObjData) {
     if (data.records && data.records.city_stats) {
       updateExamCenters(data.records.city_stats);
       updateStateExamCenters(data.records.state_stats);//newly added
-      updateZoneCenters(data.records.zone_stats);//newly added
+      // updateZoneCenters(data.records.zone_stats);//newly added
     } else {
       console.error('Unexpected data structure:', data);
       resetExamCenters();
