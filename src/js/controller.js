@@ -236,7 +236,7 @@ async function fetchRecordCount(parameterObjData) {
 // New async function to fetch venue statistics
 async function fetchVenueStat(parameterObjData) {
   try {
-    const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=800000&offset=0', {
+    const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=1170000&offset=0', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -251,8 +251,8 @@ async function fetchVenueStat(parameterObjData) {
     const data = await response.json();
     if (data.records && data.records.city_stats) {
       updateExamCenters(data.records.city_stats);
-      updateStateExamCenters(data.records.state_stats);//newly added
-      updateZoneCenters(data.records.zone_stats);//newly added
+      // updateStateExamCenters(data.records.state_stats);//newly added
+      // updateZoneCenters(data.records.zone_stats);//newly added
     } else {
       console.error('Unexpected data structure:', data);
       resetExamCenters();

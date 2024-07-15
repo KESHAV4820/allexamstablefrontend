@@ -379,18 +379,34 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    .city-item,.state-item {
-      /* background-color:#1cf8af67; */
+    .city-item{
       background: linear-gradient(to bottom right, #ffffff, #1cf8af67);
+      box-shadow: 0 4px 5px rgba(0,0,0,0.808);
+      transition: background-color 0.9s ease;
       border-radius: 8px;
       padding: 15px;
       width: calc(30% - 20px); /* Adjust width to fit 3 items per row, accounting for gap */
-      box-shadow: 0 4px 5px rgba(0,0,0,0.808);
       margin-bottom: 20px;
-      /* box-shadow: 0 0 0.72rem rgba(0, 0, 0, 0.808); */
+    };
+    .state-item{
+      background: linear-gradient(to bottom right, #ffffff, #8cfd5f);
+      box-shadow: 0 4px 5px rgba(0,0,0,0.808);
       transition: background-color 0.9s ease;
-      
-    }
+      border-radius: 8px;
+      padding: 15px;
+      width: calc(30% - 20px); /* Adjust width to fit 3 items per row, accounting for gap */
+      margin-bottom: 20px;
+    };
+    .zone-item{
+      background: linear-gradient(to bottom right, #ffffff, #fa65ff);
+      box-shadow: 0 4px 5px rgba(0,0,0,0.808);
+      transition: background-color 0.9s ease;
+      border-radius: 8px;
+      padding: 15px;
+      width: calc(30% - 20px); /* Adjust width to fit 3 items per row, accounting for gap */
+      margin-bottom: 20px;
+    };
+
     
     .city-name,.state-name {
       font-size: 18px;
