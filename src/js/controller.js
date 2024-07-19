@@ -236,8 +236,9 @@ async function fetchRecordCount(parameterObjData) {
 async function fetchVenueStat(parameterObjData) {
   try {
     const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=1170000&offset=0', {
+    // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=300000&offset=0', {// Note this code is in my laptop workstation. the limit has been kept low becouse my system can't handle higher limits>11,70,000
 
-    // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=2000000&offset=0', {//Note this code has been used in HP workstation. It is not working in my laptop. becouse my computer can't handle limit > 11,70,000 records.⚡BUt that system can.😵👌
+    // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=60000000&offset=0', {//Note this code has been used in HP workstation.
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -640,8 +641,8 @@ function generateFormattedHTML(data) {
 const viewButton = document.querySelector('.btn__4');
 //here we are calling the api endpoint in viewRecords function
 async function viewRecords(parameterObjData){
-try {
-    const response = await fetch('http://127.0.0.1:3000/api/v1/records?limit=100&offset=0',{
+try {//beyond limit=35000, even HPZ2 started failing. heap out of memory thing.
+    const response = await fetch('http://127.0.0.1:3000/api/v1/records?limit=35000&offset=0',{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
