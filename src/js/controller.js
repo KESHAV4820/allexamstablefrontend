@@ -1,5 +1,11 @@
 'use strict';
 // SuperNote: always push the code to git after pulling the code from repo. code for pulling the code is 👉 git pull origin mirrorverse . where mirror verse is the name of the branch. you need to tell this or it will throw warning/error message.
+// const {populateTable, resetSummaryTable} = require('./populateSummaryTable');
+import { populateTable,resetSummaryTable } from './populateSummaryTable.js';// newly added23/7/24
+import {SUMMARYTABLE_API_URL,SUMMARYTABLE_API_LIMIT,SUMMARYTABLE_API_OFFSET,VENUESTATS_API_URL,VENUESTATS_API_LIMIT,VENUESTATS_API_OFFSET, FETCHRECORDCOUNT_API_URL, VIEWRECORDS_API_URL, VIEWRECORDS_API_LIMIT, VIEWRECORDS_API_OFFSET, DOWNLOADRECORDS_API_URL} from './config.js';
+
+
+
 /* --------for collecting the outputs of all dropdown menu---------- */
 
 const selectedValues = {};
@@ -109,7 +115,6 @@ function updateExamCenters(cityStats) {
     examCentersDiv.appendChild(cityItem);
   };
 };
-
 function updateStateExamCenters(state_Stats) {
   const examCentersDiv = document.querySelector('.examcenters');// this will remain the same for state or zone as it's the <div> where our city-item div or state-item div or zone-item div is present.
 
@@ -127,12 +132,11 @@ function updateStateExamCenters(state_Stats) {
       <h3 class="state-name">${stateName}</h3>
       <p class="state-count">Candidates Count: <span>${data.count}</span></p>
       <p class="state-percentage">% of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
-      <p class="state-per-lakh">Per Lakh: <span>${data.perLakh.toFixed(5)}</span></p>
+      <p class="state-per-lakh">Per Lakh: <span>${data.perLakh !== null ? data.perLakh.toFixed(5):'citycodenotmapped'}</span></p>
     `;
     examCentersDiv.appendChild(stateItem);
   }
 };
-
 function updateZoneCenters(zoneStats) {
   const examCentersDiv = document.querySelector('.examcenters');// this will remain the same for state or zone as it's the <div> where our city-item div or state-item div or zone-item div is present.
 
@@ -155,15 +159,13 @@ function updateZoneCenters(zoneStats) {
     examCentersDiv.appendChild(zoneItem);
   }
 };
-
-
 // Function to reset exam centers and show placeholder image
 function resetExamCenters() {
   const examCentersDiv = document.querySelector('.examcenters');
   examCentersDiv.innerHTML = '<img src="/img/testing.png" alt="Logo" class="header__logo" />';
 }
 
-
+// to select the names of the dropdown value in the dropdown menu and also rest it. 
 dropdownContainers.forEach(dropdown => {
   const span = dropdown.querySelector('.selected-value');
   const content = dropdown.querySelector('.dropdown-content');
@@ -177,9 +179,12 @@ dropdownContainers.forEach(dropdown => {
     const dropdownIndex = dropdown.classList[1].split('__')[1];
     const parameterName = parameterMap[dropdownIndex];
 
+    // Update selectedValues
+    selectedValues[parameterName] = clickedValue;//SuperNote this piece of code saved my ass. The download section wasn't getting the parameters comming from frontend dropdown menu. This piece of code made it possible for to correct all those mistakes.
+
     span.setAttribute('data-value', clickedValue);
     span.setAttribute('data-param', parameterName);
-    
+
     updateOKButtonState();
   });
 });
@@ -195,8 +200,9 @@ function updateOKButtonState() {
 
 updateOKButtonState();
 
-okButton.addEventListener('click', () => {
-
+//Event listeners on OK button.
+okButton.addEventListener('click', (e) => {
+    e.preventDefault();
   const lockedSelectedValues = JSON.stringify(selectedValues, null, 2);
   console.log('Selected Values:', lockedSelectedValues);//VIECode Testing
 });// VIESuper to check inputs comming from frontend. 
@@ -215,7 +221,8 @@ dropdownContainers.forEach(dropdown => {
 
 async function fetchRecordCount(parameterObjData) {
   try {
-    const response = await fetch('http://127.0.0.1:3000/api/v1/recordcount', {
+    const response = await fetch(`${FETCHRECORDCOUNT_API_URL}`,
+      {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -235,7 +242,8 @@ async function fetchRecordCount(parameterObjData) {
 // New async function to fetch venue statistics
 async function fetchVenueStat(parameterObjData) {
   try {
-    const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=1170000&offset=0', {
+    // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=1170000&offset=0', {
+      const response = await fetch(`${VENUESTATS_API_URL}?limit=${VENUESTATS_API_LIMIT}&offset=${VENUESTATS_API_OFFSET}`,{
     // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=300000&offset=0', {// Note this code is in my laptop workstation. the limit has been kept low becouse my system can't handle higher limits>11,70,000
 
     // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=60000000&offset=0', {//Note this code has been used in HP workstation.
@@ -265,6 +273,36 @@ async function fetchVenueStat(parameterObjData) {
   }
 }
 
+// async funtion to fetch the data to populate summmaytable
+async function fetchSummaryTable(displayType = 'numbers') {
+  try {
+    const response = await fetch('http://127.0.0.1:3000/api/v1/summarytablestats?limit=316000&offset=0',
+    // const response = await fetch(`${SUMMARYTABLE_API_URL}?limit=${SUMMARYTABLE_API_LIMIT}&offset=${SUMMARYTABLE_API_OFFSET}`,
+      {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch the summarytablestats');
+    }
+
+    const data = await response.json();
+    if (data.examname) {
+      populateTable(data, displayType);
+    } else {
+      console.error('Unexpected data structure, 😨 ye kahaan se aaya bhai:', data);
+      resetSummaryTable();
+    }
+  } catch (error) {
+    console.error('Error while fetching😵summary table stats:', error);
+    resetSummaryTable();
+  }
+};//newly added23/7/24
+
+
 // to call fetchRecordCount() function every time i press OK button. Actually to set the value in the "<span></span>" element. 
 okButton.addEventListener('click', async (e) => {
   e.preventDefault();
@@ -284,14 +322,18 @@ okButton.addEventListener('click', async (e) => {
     document.getElementById('recordsOfData').textContent = recordCount;
   } else {
     console.error('fetch record count is not working. This error is comming from LOC 205 around');
-  }
+  };
 
   const applicantCount = examApplicants[parameterSendingToApi.EXAMNAME] || 0;
   document.getElementById('noOfApplicant').textContent = applicantCount;
-
+  console.log(parameterSendingToApi);//Code Testing
+  
   
   // Fetching and update exam center stats
   await fetchVenueStat(parameterSendingToApi);
+
+  //Fetching and updating the summary table in numbers by default
+  await fetchSummaryTable('numbers');// newly added23/7/24
 });
 
 // similarly CLEAR button functionaliyt
@@ -314,12 +356,25 @@ clearButton.addEventListener('click', (e) => {
 
   // reset exam centers and show placeholder image
   resetExamCenters();
+
+  // to reset the summary table when clear button is clicked.
+  resetSummaryTable();//newly added23/7/24
 });
 // to initialize the span with value 0 every time page loads. looks neat. 
 document.getElementById('recordsOfData').textContent = '0';
 // Calling resetExamCenters on page load to show the placeholder image initially
 document.addEventListener('DOMContentLoaded',()=>{resetExamCenters();});
 
+
+document.querySelector('.btn__5').addEventListener('click', (e)=>{
+  e.preventDefault();
+  fetchSummaryTable('numbers');
+});//newly added23/7/24
+
+document.querySelector('.btn__6').addEventListener('click', (e) =>{ 
+  e.preventDefault();
+  fetchSummaryTable('percentage');
+});//newly added23/7/24
 
 //----- To Add Data View functionality. 
 // This function provides template to dress data comming from our API.
@@ -642,7 +697,9 @@ const viewButton = document.querySelector('.btn__4');
 //here we are calling the api endpoint in viewRecords function
 async function viewRecords(parameterObjData){
 try {//beyond limit=35000, even HPZ2 started failing. heap out of memory thing.
-    const response = await fetch('http://127.0.0.1:3000/api/v1/records?limit=35000&offset=0',{
+    // const response = await fetch('http://127.0.0.1:3000/api/v1/records?limit=35000&offset=0',
+      const response = await fetch(`${VIEWRECORDS_API_URL}?limit=${VIEWRECORDS_API_LIMIT}&offset=${VIEWRECORDS_API_OFFSET}`,
+      {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -652,16 +709,21 @@ try {//beyond limit=35000, even HPZ2 started failing. heap out of memory thing.
     const data = await response.json();
     
     const newTab = window.open('', '_blank');
-    newTab.document.write(generateFormattedHTML(data));
+    newTab.document.write(generateFormattedHTML(data));//Issue Found
     newTab.document.close();
   } catch (error) {
     console.error('Error fetching data:', error);
     alert('Failed to fetch data. Please try again.');
   }
 };
+console.log(selectedValues);//Code Testing
+
+
 //here eventlisteners are being pasted upon the ViewButton.
-viewButton.addEventListener('click', async () => {
+viewButton.addEventListener('click', async (e) => {
+  e.preventDefault();
   const parameterSendingToApi = {...selectedValues};
+  console.log(parameterSendingToApi, selectedValues);//Code Testing
   await viewRecords(parameterSendingToApi);
 });
 
@@ -784,8 +846,11 @@ viewButton.addEventListener('click', async () => {
 const downloadButton = document.querySelector('.btn__3');
 
 async function downloadRecords(parameterObjData) {
+  console.log(parameterObjData);// Code Testing  
   try {
-    const response = await fetch('http://127.0.0.1:3000/api/v1/downloadrecords', {
+    // const response = await fetch('http://127.0.0.1:3000/api/v1/downloadrecords',
+    const response = await fetch(`${DOWNLOADRECORDS_API_URL}`,
+      {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -799,7 +864,7 @@ async function downloadRecords(parameterObjData) {
     
     // Get the filename from the Content-Disposition header
     const contentDisposition = response.headers.get('Content-Disposition');
-    let filename = 'data.zip'; // Default filename
+    let filename = 'data.zip'; // changes this filename for production
     if (contentDisposition) {
       const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
       if (filenameMatch) {
@@ -825,10 +890,14 @@ async function downloadRecords(parameterObjData) {
     console.error('Error:', error);
     alert('Failed to download records. Please try again.');
   }
-};//newly added
+};
 
-downloadButton.addEventListener('click', async () => {
+downloadButton.addEventListener('click', async (e) => {
+  e.preventDefault();
   const parameterSendingToApi = {...selectedValues};
+  console.log(selectedValues);//Code Testing
+  console.log(parameterSendingToApi);//Code Testing
+  
   await downloadRecords(parameterSendingToApi);
 });
 
