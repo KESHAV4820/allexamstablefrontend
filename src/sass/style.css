@@ -137,7 +137,15 @@
     .btn__4{/*VIEW*/
       grid-area: 1/7/2/8;
       width: 5.3125rem;
-  }
+    }
+    .btn__5{
+      grid-area: 1/4/2/5;
+      margin: 1rem;
+    }
+    .btn__6{
+      grid-area: 1/6/2/7;
+      margin: 1rem;
+    }
     #num_Record_Data{
       grid-area: 1/1/2/3;
       font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -167,6 +175,9 @@
     
     .stats{
         grid-area: 8/3/9/4;
+        display:grid;
+        /* grid-template-rows: sub grid; */
+        /* grid-template-columns: sub grid; */
         /* align-items:end; */
         /* justify-content:end; */
         text-align: right;
@@ -379,6 +390,20 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    .examcenters img{
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    /* Ensure the placeholder image is centered when no cities are displayed */
+    .header__logo {
+      display: block;
+      margin: auto;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+    }
     
     .city-item{
       background: linear-gradient(to bottom right, #ffffff, #1cf8af67);
@@ -420,12 +445,5 @@
       color: #666;
     }
 
-    /* Ensure the placeholder image is centered when no cities are displayed */
-    .header__logo {
-      display: block;
-      margin: auto;
-      position: relative;
-      top: 50%;
-      transform: translateY(-50%);
-    }
+    
 
