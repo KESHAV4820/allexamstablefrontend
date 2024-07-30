@@ -277,8 +277,8 @@ async function fetchVenueStat(parameterObjData) {
 // async funtion to fetch the data to populate summmaytable
 async function fetchSummaryTable(displayType = 'numbers') {
   try {
-    const response = await fetch('http://127.0.0.1:3000/api/v1/summarytablestats?limit=316000&offset=0',
-    // const response = await fetch(`${SUMMARYTABLE_API_URL}?limit=${SUMMARYTABLE_API_LIMIT}&offset=${SUMMARYTABLE_API_OFFSET}`,
+    // const response = await fetch('http://127.0.0.1:3000/api/v1/summarytablestats?limit=316000&offset=0',
+    const response = await fetch(`${SUMMARYTABLE_API_URL}?limit=${SUMMARYTABLE_API_LIMIT}&offset=${SUMMARYTABLE_API_OFFSET}`,
       {
       method: 'POST',
       headers: {
