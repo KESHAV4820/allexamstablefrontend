@@ -133,7 +133,7 @@ function updateStateExamCenters(state_Stats) {
   }
 };
 
-/*//newly added
+
 function updateZoneCenters(zoneStats) {
   const examCentersDiv = document.querySelector('.examcenters');// this will remain the same for state or zone as it's the <div> where our city-item div or state-item div or zone-item div is present.
 
@@ -156,7 +156,7 @@ function updateZoneCenters(zoneStats) {
     examCentersDiv.appendChild(zoneItem);
   }
 };
-*/
+
 
 // Function to reset exam centers and show placeholder image
 function resetExamCenters() {
@@ -177,6 +177,8 @@ dropdownContainers.forEach(dropdown => {
 
     const dropdownIndex = dropdown.classList[1].split('__')[1];
     const parameterName = parameterMap[dropdownIndex];
+
+    selectedValues[parameterName] = clickedValue;//SuperNote:VIE becouse of the absance of this code, the download button was getting no access to parameters that will help it fetch the data from database which it will download in the next stage.Backend was correct. it was a frontend problem
 
     span.setAttribute('data-value', clickedValue);
     span.setAttribute('data-param', parameterName);
@@ -238,7 +240,7 @@ async function fetchVenueStat(parameterObjData) {
   try {
     // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=300000&offset=0', {// Note this code is in my laptop workstation. the limit has been kept low becouse my system can't handle higher limits>11,70,000
 
-    const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=60000000&offset=0', {//Note this code has been used in HP workstation.
+    const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=2290000&offset=0', {//Note this code has been used in HP workstation.
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -253,8 +255,8 @@ async function fetchVenueStat(parameterObjData) {
     const data = await response.json();
     if (data.records && data.records.city_stats) {
       updateExamCenters(data.records.city_stats);
-      updateStateExamCenters(data.records.state_stats);//newly added
-      // updateZoneCenters(data.records.zone_stats);//newly added
+      updateStateExamCenters(data.records.state_stats);
+      updateZoneCenters(data.records.zone_stats);
     } else {
       console.error('Unexpected data structure:', data);
       resetExamCenters();
