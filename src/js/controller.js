@@ -111,6 +111,7 @@ function updateExamCenters(cityStats) {
       <p class="city-count">Candidates Count: <span>${data.count ?? 0}</span></p>
       <p class="city-percentage">% of Seats: <span>${(data.percentageSeat ?? 0).toFixed(5)}</span>%</p>
       <p class="city-per-lakh">Per Lakh: <span>${(data.perLakh ?? 0).toFixed(5)}</span></p>
+      <p class="percent-against-appeared">% against Appeared Candidate: <span>${data.percentageToPlace !== null ? data.percentageToPlace.toFixed(3):'percentagenotmapped'}</span>%</p>
     `;
     examCentersDiv.appendChild(cityItem);
   };
@@ -133,6 +134,8 @@ function updateStateExamCenters(state_Stats) {
       <p class="state-count">Candidates Count: <span>${data.count}</span></p>
       <p class="state-percentage">% of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
       <p class="state-per-lakh">Per Lakh: <span>${data.perLakh !== null ? data.perLakh.toFixed(5):'citycodenotmapped'}</span></p>
+      <p class="percent-against-appeared">% against Appeared Candidate: <span>${data.percentageToPlace !== null ? data.percentageToPlace.toFixed(3):'percentagenotmapped'}</span>%</p>
+
     `;
     examCentersDiv.appendChild(stateItem);
   }
@@ -155,6 +158,7 @@ function updateZoneCenters(zoneStats) {
       <p class="state-count">Candidates Count: <span>${data.count}</span></p>
       <p class="state-percentage">% of Seats: <span>${data.percentageSeat.toFixed(5)}</span>%</p>
       <p class="state-per-lakh">Per Lakh: <span>${data.perLakh.toFixed(5)}</span></p>
+      <p class="percent-against-appeared">% against Appeared Candidate: <span>${data.percentageToPlace !== null ? data.percentageToPlace.toFixed(3):'percentagenotmapped'}</span>%</p>
     `;
     examCentersDiv.appendChild(zoneItem);
   }

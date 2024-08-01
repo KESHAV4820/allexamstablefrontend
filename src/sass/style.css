@@ -439,7 +439,7 @@
       color: #333;
     }
     
-    .city-count, .city-percentage, .city-per-lakh, .state-count, .state-percentage, .state-per-lakh, .zone-count, .zone-percentage, .zone-per-lakh {
+    .city-count, .city-percentage, .city-per-lakh, .state-count, .state-percentage, .state-per-lakh, .zone-count, .zone-percentage, .zone-per-lakh, .percent-against-appeared {
       font-size: 14px;
       margin: 5px 0;
       color: #666;
