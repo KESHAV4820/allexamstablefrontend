@@ -906,44 +906,5 @@ downloadButton.addEventListener('click', async (e) => {
   await downloadRecords(parameterSendingToApi);
 });
 
-/* Bug Found legacy code 
-const downloadButton = document.querySelector('.btn__3');
-
-async function triggerDownload(parameterObjData) {
-  try {
-    const response = await fetch('http://127.0.0.1:3000/api/v1/downloadrecords', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(parameterObjData),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    
-    // Check if the download was successful
-    const result = await response.json();
-    if (result.success) {
-      alert('Download successful. Check your D drive for the data.zip file.');
-    } else {
-      throw new Error('Download failed on the server side');
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    if (error.response) {
-      console.error('Response status:', error.response.status);
-      console.error('Response data:', await error.response.text());
-    }
-    alert('Failed to initiate download. Please try again.');
-  }
-}
-
-downloadButton.addEventListener('click', async () => {
-  const parameterSendingToApi = {...selectedValues};
-  await triggerDownload(parameterSendingToApi);
-});
-*/
 
 export { selectedValues };
