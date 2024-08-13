@@ -279,7 +279,7 @@ async function fetchVenueStat(parameterObjData) {
 }
 
 // async funtion to fetch the data to populate summmaytable
-async function fetchSummaryTable(displayType = 'numbers') {
+async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
   try {
     // const response = await fetch('http://127.0.0.1:3000/api/v1/summarytablestats?limit=316000&offset=0',
     const response = await fetch(`${SUMMARYTABLE_API_URL}?limit=${SUMMARYTABLE_API_LIMIT}&offset=${SUMMARYTABLE_API_OFFSET}`,
@@ -288,6 +288,7 @@ async function fetchSummaryTable(displayType = 'numbers') {
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify(parameterObjData),
     });
 
     if (!response.ok) {
@@ -338,7 +339,7 @@ okButton.addEventListener('click', async (e) => {
   await fetchVenueStat(parameterSendingToApi);
 
   //Fetching and updating the summary table in numbers by default
-  await fetchSummaryTable('numbers');// newly added23/7/24
+  await fetchSummaryTable(parameterSendingToApi,'numbers');// newly added23/7/24Issue Found parameterSendingToApi hasn't been sent.
 });
 
 // similarly CLEAR button functionaliyt
