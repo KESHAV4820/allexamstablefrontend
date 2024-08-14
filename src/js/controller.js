@@ -279,6 +279,7 @@ async function fetchVenueStat(parameterObjData) {
 }
 
 // async funtion to fetch the data to populate summmaytable
+let dataToBtn5, dataToBtn6;//newly added14/08/24
 async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
   try {
     // const response = await fetch('http://127.0.0.1:3000/api/v1/summarytablestats?limit=316000&offset=0',
@@ -301,7 +302,11 @@ async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
     } else {
       console.error('Unexpected data structure, 😨 ye kahaan se aaya bhai:', data);
       resetSummaryTable();
-    }
+    };
+
+    dataToBtn5=data;//newly added14/08/24
+    dataToBtn6=data;//newly added14/08/24
+
   } catch (error) {
     console.error('Error while fetching😵summary table stats:', error);
     resetSummaryTable();
@@ -339,7 +344,7 @@ okButton.addEventListener('click', async (e) => {
   await fetchVenueStat(parameterSendingToApi);
 
   //Fetching and updating the summary table in numbers by default
-  await fetchSummaryTable(parameterSendingToApi,'numbers');// newly added23/7/24Issue Found parameterSendingToApi hasn't been sent.
+  await fetchSummaryTable(parameterSendingToApi,'numbers');// newly added23/7/24
 });
 
 // similarly CLEAR button functionaliyt
@@ -374,12 +379,13 @@ document.addEventListener('DOMContentLoaded',()=>{resetExamCenters();});
 
 document.querySelector('.btn__5').addEventListener('click', (e)=>{
   e.preventDefault();
-  fetchSummaryTable('numbers');
-});//newly added23/7/24
+  populateTable(dataToBtn5, 'numbers');//newly added14/08/24 we aren't calling API in this code upgrade to bypass the Issue that we found👇🏼
+});//newly added23/7/24//Issue Found: what is being sent in parameterSendingToApi json formate. Becouse the browser is saying that there is somekind of problem with it. Hence, i think, we need to defined the header for CORS error resolution and body of the json formate to solve the issue of proper key:value pair, that is being sent after this button is clicked. So the same for .btn__6 as well. But first let's see what's going out there in  parameterSendingToApi at this point. Issue Resolved: since backend is sending number and percentage data on first fetch itself, why do any more fetch. hence is simply used the data that came with the first fetch in fetchSummaryTable() function. after fetching the data, it sends the to populateTable() in the frontend side only. So i directly use the data comming and populateTable() when .btn__5 or .btn__6 are pressed.😎 And the CORS has been addressed in the backend. the is no such problem in my code as such. ⚡
 
 document.querySelector('.btn__6').addEventListener('click', (e) =>{ 
+  // console.log(dataToBtn6);//Code Testing
   e.preventDefault();
-  fetchSummaryTable('percentage');
+  populateTable(dataToBtn6, 'percentage');//newly added14/08/24 code upgrade
 });//newly added23/7/24
 
 //----- To Add Data View functionality. 

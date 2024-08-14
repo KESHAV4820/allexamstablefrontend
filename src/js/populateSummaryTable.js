@@ -4,6 +4,8 @@
 // this function is meant to poplate the table based on the choice :- numbers or percentage
 
 async function populateTable(stats, displayType = 'numbers') {
+  console.log(stats,displayType);//Code Testing
+  
     const mapping = [
       { row: "CANDIDATES", data: displayType === 'numbers' ? stats.candidates : stats.candidates_per },
       { row: "MALES", data: displayType === 'numbers' ? stats.male : stats.male_per },
