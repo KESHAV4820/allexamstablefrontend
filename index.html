@@ -44,8 +44,8 @@
       <div class="databaseoutputarea">
         <div class="dataActionArea">
             <p id="num_Record_Data">Number of Records: <span id="recordsOfData">000000</span></p>
-            <button class="btn btn__4">VIEW</button>
-            <button class="btn btn__3">DOWNLOAD</button> 
+            <button class="btn btn__4" component-tooltip="Click to view the Data received">VIEW</button>
+            <button class="btn btn__3" component-tooltip="click to download the data received">DOWNLOAD</button> 
         </div>
         <div class="databaseoutput">
             <div>
@@ -76,25 +76,11 @@
       </div>
       
     <div class="dropdown-container">
-        <!--Usless Coding <div class="dropdown  dropdown__1">
-          <span class="selected-value">YEAR</span>
-          <div class="dropdown-content">
-            <a href="#">ALL YEAR</a>
-            <a href="#">2023</a>
-            <a href="#">2022</a>
-            <a href="#">2021</a>
-            <a href="#">2020</a>
-            <a href="#">2019</a>
-            <a href="#">2018</a>
-            <a href="#">2017</a>
-            <a href="#">2016</a>
-          </div>
-        </div> -->
   
-        <div class="dropdown  dropdown__1">
+        <div class="dropdown  dropdown__1" component-tooltip="Click to select the EXAM name whose information is needed">
           <span class="selected-value">EXAMs</span>
           <div class="dropdown-content">
-                <a href="#" value="ALL EXAMS">ALL EXAMS</a>
+                <!-- <a href="#" value="ALL EXAMS" component-tooltip="To get Result from consolidated data of total exams in the database">ALL EXAMS</a> -->
                 <a href="#" value="AWO/TPO-2022">AWO/TPO-2022</a>
                 <a href="#" value="CAPF-2023">CAPF-2023</a>
                 <a href="#" value="CAPF-2022">CAPF-2022</a>
@@ -104,7 +90,7 @@
                 <a href="#" value="CAPF-2017">CAPF-2017</a>
                 <a href="#" value="CAPF-2016">CAPF-2016</a>
                 <a href="#" value="CGL-2023">CGL-2023</a>
-                <a href="#" value="CGL-2022">CGL-2022</a>
+                <a href="#" value="CGL-2022" component-tooltip="large dataset. have to wait a little">CGL-2022</a>
                 <a href="#" value="CGL-2021">CGL-2021</a>
                 <a href="#" value="CGL-2020">CGL-2020</a>
                 <a href="#" value="CGL-2019">CGL-2019</a>
@@ -118,8 +104,8 @@
                 <a href="#" value="CHSL-2019">CHSL-2019</a>
                 <a href="#" value="CHSL-2018">CHSL-2018</a>
                 <a href="#" value="CHSL-2017">CHSL-2017</a>
-                <a href="#" value="CONSTABLE-2022">CONSTABLE-2022</a>
-                <a href="#" value="CONSTABLE-2021">CONSTABLE-2021</a>
+                <a href="#" value="CONSTABLE-2022" component-tooltip="Huge Dataset: Least Wait time: 45 seconds atleast">CONSTABLE-2022</a>
+                <a href="#" value="CONSTABLE-2021" component-tooltip="Huge Dataset: Least Wait time: 1 minute">CONSTABLE-2021</a>
                 <a href="#" value="CONSTABLE-2018">CONSTABLE-2018</a>
                 <a href="#" value="DPCST-2023">DPCST-2023</a>
                 <a href="#" value="DPCST-2020">DPCST-2020</a>
@@ -162,25 +148,25 @@
           </div>
         </div>
   
-        <div class="dropdown dropdown__2">
+        <div class="dropdown dropdown__2" component-tooltip="It is the catagory name as submitted by the candidate">
           <span class="selected-value">CATAGORY</span>
           <div class="dropdown-content">
             <a href="#" value="TOGETHER">TOGETHER</a>
-            <a href="#" value="0">EWS (0)</a>
-            <a href="#" value="1">SC (1)</a>
-            <a href="#" value="2">ST (2)</a>
+            <a href="#" value="0" component-tooltip="Economically Weaker Section">EWS (0)</a>
+            <a href="#" value="1" component-tooltip="Schedulled Caste">SC (1)</a>
+            <a href="#" value="2" component-tooltip="Schedulled Tribe">ST (2)</a>
             <!-- <a href="#">3 ESM</a> -->
             <!-- <a href="#">4 OH</a> -->
             <!-- <a href="#">5 HH</a> -->
-            <a href="#" value="6">OBC (6)</a>
+            <a href="#" value="6" component-tooltip="Other Backward Caste">OBC (6)</a>
             <!-- <a href="#">7 VH</a> -->
             <!-- <a href="#">8 PWD</a> -->
-            <a href="#" value="9">UR (9)</a>
+            <a href="#" value="9" component-tooltip="Unreserved">UR (9)</a>
           </div>
         </div>
 
       
-        <div class="dropdown  dropdown__3">
+        <div class="dropdown  dropdown__3" component-tooltip="Choose Stages of selection">
           <span class="selected-value">CRITERIA</span>
           <div class="dropdown-content">
             <!-- <a href="#" value="OVERALL">OVERALL</a> -->
@@ -199,21 +185,21 @@
         </div>
 
 
-        <div class="dropdown dropdown__4">
+        <div class="dropdown dropdown__4" component-tooltip="to select the 'CATAGORY OF SELECTION' as ASSIGNED by the commission">
           <span class="selected-value">CAT_Selected</span>
           <div class="dropdown-content">
-            <a href="#" value="ALL_TOGETHER">TOGETHER</a>
-            <a href="#" value="0">EWS (0)</a>
-            <a href="#" value="1">SC (1)</a>
-            <a href="#" value="2">ST (2)</a>
-            <a href="#" value="3">ESM (3)</a>
-            <a href="#" value="4">OH (4)</a>
-            <a href="#" value="5">HH (5)</a>
-            <a href="#" value="6">OBC (6)</a>
-            <a href="#" value="7">VH (7)</a>
-            <a href="#" value="8">PWD (8)</a>
-            <a href="#" value="9">UR (9)</a>
-            <a href="#" value="">NONE</a>
+            <a href="#" value="ALL_TOGETHER" component-tooltip="To select all irrespective of their Catagory of selection">TOGETHER</a>
+            <a href="#" value="0" component-tooltip="Economically Weaker Section">EWS (0)</a>
+            <a href="#" value="1" component-tooltip="Schedulled Caste">SC (1)</a>
+            <a href="#" value="2" component-tooltip="Schedulled Tribe">ST (2)</a>
+            <a href="#" value="3" component-tooltip="Ex-Service Man">ESM (3)</a>
+            <a href="#" value="4" component-tooltip="Orthopadically Handicapped">OH (4)</a>
+            <a href="#" value="5" component-tooltip="Hearing Handicappness">HH (5)</a>
+            <a href="#" value="6" component-tooltip="Other Backward Caste">OBC (6)</a>
+            <a href="#" value="7" component-tooltip="Visually Handicapped">VH (7)</a>
+            <a href="#" value="8" component-tooltip="Physcially Handicapped Disability">PWD (8)</a>
+            <a href="#" value="9" component-tooltip="Unreserved">UR (9)</a>
+            <!-- <a href="#" value="" >NONE</a> -->
           </div>
         </div>
 
@@ -221,14 +207,14 @@
         <div class="dropdown dropdown__5">
           <span class="selected-value">GENDER</span>
             <div class="dropdown-content">
-            <a href="#" Value="OVERALL">OVERALL</a>
+            <a href="#" Value="OVERALL" component-tooltip="For all the genders, taken together">OVERALL</a>
             <a href="#" value="M">MALE</a>
             <a href="#" value="F">FEMALE</a>
-            <a href="#" value="T">OTHERS</a>
+            <a href="#" value="T" component-tooltip="For Gender other than Male and Female">OTHERS</a>
           </div>
         </div> 
 
-        <div class="dropdown dropdown__6">
+        <div class="dropdown dropdown__6" component-tooltip="to select Horizontal reservation of Ex-Serviceman quota Catagory=3">
           <span class="selected-value">EX-SERVICE PERSONEL</span>
             <div class="dropdown-content">
             <a href="#" value="3">YES</a>
@@ -236,20 +222,20 @@
           </div>
         </div>
 
-        <div class="dropdown dropdown__7">
+        <div class="dropdown dropdown__7" component-tooltip="to select Horizontal reservation quota for handicappness">
           <span class="selected-value">DISABILITY</span>
             <div class="dropdown-content">
-            <a href="#" value="TOGETHER">TOGETHER</a>
-            <a href="#" value="4">OH</a>
-            <a href="#" value="5">HH</a>
-            <a href="#" value="7">VH</a>
-            <a href="#" value="8">PWD</a>
+            <a href="#" value="TOGETHER" component-tooltip="to select all kinds of disabilities">TOGETHER</a>
+            <a href="#" value="4" component-tooltip="Ortho-Handicappness: Dward, locomotor issue, muscle issue,acid attacks">OH</a>
+            <a href="#" value="5" component-tooltip="Hearing Handicappness: deaf, hard hearing, Autism and mental issue">HH</a>
+            <a href="#" value="7" component-tooltip="Visually Handicapped: Blindness, vision problem etc">VH</a>
+            <a href="#" value="8" component-tooltip="Physically Disabled: lapper, limbs issue, arthrities, Epilapsy etc.">PWD</a>
           </div>
         </div> 
   
-        <button class="btn btn__1">OK</button>
+        <button class="btn btn__1" component-tooltip="Click to submit the Attribute selection">OK</button>
     </div>
-      <button class="btn btn__2">CLEAR</button>
+      <button class="btn btn__2" component-tooltip="Click to clear all the previous selection in the memory">CLEAR</button>
       <!-- <button class="btn btn__3">DOWNLOAD</button> -->
       <!-- <button class="btn btn__5">IMPORT</button> but this is going to be a huge implementation. Not Possible as of now. -->
       <!-- <button class="btn btn__4">SAVE/EXPORT</button> if the print is going to take me to the inbuilt print view of Windows where i am going to get the option to save the file as pdf or print it on the paper, should a dedicated save be give. Export can be useful. Postgre will export the current querried table in .csv formate. but the problem is that this table can be of any size and excel won't open such file and the end user intended to use this application is expected not to be tech-savy enough that they may need the use of a .csv file. Such kind of request can be sent to tech support and they will give the required table from the database itself. Plus this will lead to a loose end into the system where a person, without much access can use this system alone to get the data of a huge number of candidate. We don't want that. -->

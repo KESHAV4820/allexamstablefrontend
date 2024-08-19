@@ -220,6 +220,40 @@ dropdownContainers.forEach(dropdown => {
   span.setAttribute('data-default', span.textContent);
 });
 
+//--------------for adding Component-Tooltip----------------------
+//function to be called to show the tip tip on mouse hover start. 
+function showComponentToolTip(event) {
+  const tooltip = event.target.getAttribute('component-tooltip');// here we copied the text that was put as tool tip for that component. 
+  const tooltipElement = document.createElement('div');// creating the div element where we shall put the contents of tooltip variable from above.
+  tooltipElement.className = 'tooltip';//we are basically saying <div class="tooltip"></div> in this code.😊 we will use this class name in CSS. 
+  tooltipElement.textContent = tooltip;// copying the text into the <div></div> we created.
+  //code upgrade👇🏼 document.body.appendChild(tooltipElement);//attaching our <div></div> item where the hower is commited.
+  event.target.appendChild(tooltipElement);
+
+  setTimeout(() => {
+  const positionalDimensionDataOfElement = event.target.getBoundingClientRect();
+  //SuperNoteLearnByHeart: positionalDimensionDataOfElement now contains data & properties like left, top, right, bottom, width, and height of the target element.
+  tooltipElement.style.left = `${positionalDimensionDataOfElement.left + positionalDimensionDataOfElement.width/2 - tooltipElement.offsetWidth/2+20}px`;
+  tooltipElement.style.top = `${positionalDimensionDataOfElement.top + tooltipElement.offsetHeight-105}px`;
+  tooltipElement.style.opacity=1;
+  tooltipElement.style.transform = 'translateY(0)'},10);// Note: to introduce the time interval of appeance. 
+};
+// function to hide the tooltip if the hover ends. 
+function hideComponentToolTip() {
+  const componentTooltip = document.querySelector('.tooltip');
+  if (componentTooltip) {
+    componentTooltip.remove();
+  }
+};
+// here we are handling the part where the mouse pointer hover or leaves.
+document.addEventListener('DOMContentLoaded', () => {
+  const componenttooltipElement = document.querySelectorAll('[component-tooltip]');
+  
+  componenttooltipElement.forEach(element => {
+    element.addEventListener('mouseenter', showComponentToolTip);// becouse we don't have 'mousehover' event as such in JS . instead we use the event like when mouseenter and when mouseleave🧑🏼
+    element.addEventListener('mouseleave', hideComponentToolTip);
+  });
+});
 
 
 
@@ -279,7 +313,7 @@ async function fetchVenueStat(parameterObjData) {
 }
 
 // async funtion to fetch the data to populate summmaytable
-let dataToBtn5, dataToBtn6;//newly added14/08/24
+let dataToBtn5, dataToBtn6;
 async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
   try {
     // const response = await fetch('http://127.0.0.1:3000/api/v1/summarytablestats?limit=316000&offset=0',
@@ -311,7 +345,7 @@ async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
     console.error('Error while fetching😵summary table stats:', error);
     resetSummaryTable();
   }
-};//newly added23/7/24
+};
 
 
 // to call fetchRecordCount() function every time i press OK button. Actually to set the value in the "<span></span>" element. 
@@ -344,7 +378,7 @@ okButton.addEventListener('click', async (e) => {
   await fetchVenueStat(parameterSendingToApi);
 
   //Fetching and updating the summary table in numbers by default
-  await fetchSummaryTable(parameterSendingToApi,'numbers');// newly added23/7/24
+  await fetchSummaryTable(parameterSendingToApi,'numbers');
 });
 
 // similarly CLEAR button functionaliyt
@@ -369,7 +403,7 @@ clearButton.addEventListener('click', (e) => {
   resetExamCenters();
 
   // to reset the summary table when clear button is clicked.
-  resetSummaryTable();//newly added23/7/24
+  resetSummaryTable();
 });
 // to initialize the span with value 0 every time page loads. looks neat. 
 document.getElementById('recordsOfData').textContent = '0';
@@ -379,14 +413,14 @@ document.addEventListener('DOMContentLoaded',()=>{resetExamCenters();});
 
 document.querySelector('.btn__5').addEventListener('click', (e)=>{
   e.preventDefault();
-  populateTable(dataToBtn5, 'numbers');//newly added14/08/24 we aren't calling API in this code upgrade to bypass the Issue that we found👇🏼
-});//newly added23/7/24//Issue Found: what is being sent in parameterSendingToApi json formate. Becouse the browser is saying that there is somekind of problem with it. Hence, i think, we need to defined the header for CORS error resolution and body of the json formate to solve the issue of proper key:value pair, that is being sent after this button is clicked. So the same for .btn__6 as well. But first let's see what's going out there in  parameterSendingToApi at this point. Issue Resolved: since backend is sending number and percentage data on first fetch itself, why do any more fetch. hence is simply used the data that came with the first fetch in fetchSummaryTable() function. after fetching the data, it sends the to populateTable() in the frontend side only. So i directly use the data comming and populateTable() when .btn__5 or .btn__6 are pressed.😎 And the CORS has been addressed in the backend. the is no such problem in my code as such. ⚡
+  populateTable(dataToBtn5, 'numbers');//we aren't calling API in this code upgrade to bypass the Issue that we found👇🏼
+});//Issue Found: what is being sent in parameterSendingToApi json formate. Becouse the browser is saying that there is somekind of problem with it. Hence, i think, we need to defined the header for CORS error resolution and body of the json formate to solve the issue of proper key:value pair, that is being sent after this button is clicked. So the same for .btn__6 as well. But first let's see what's going out there in  parameterSendingToApi at this point. Issue Resolved: since backend is sending number and percentage data on first fetch itself, why do any more fetch. hence is simply used the data that came with the first fetch in fetchSummaryTable() function. after fetching the data, it sends the to populateTable() in the frontend side only. So i directly use the data comming and populateTable() when .btn__5 or .btn__6 are pressed.😎 And the CORS has been addressed in the backend. the is no such problem in my code as such. ⚡
 
 document.querySelector('.btn__6').addEventListener('click', (e) =>{ 
   // console.log(dataToBtn6);//Code Testing
   e.preventDefault();
-  populateTable(dataToBtn6, 'percentage');//newly added14/08/24 code upgrade
-});//newly added23/7/24
+  populateTable(dataToBtn6, 'percentage');
+});
 
 //----- To Add Data View functionality. 
 // This function provides template to dress data comming from our API.

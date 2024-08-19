@@ -445,5 +445,41 @@
       color: #666;
     }
 
+    .tooltip {
+      position: fixed;
+      background-color: rgb(120, 250, 243);
+      color: #070707;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      max-width: 250px;
+      word-wrap: break-word;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.836);
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      transition-delay: 5s;
+    }
+    
+    .tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 6px solid rgba(51, 51, 51, 0.952);
+    }
+    
+    [component-tooltip]:hover .tooltip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     
 
