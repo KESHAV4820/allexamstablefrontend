@@ -223,37 +223,51 @@ dropdownContainers.forEach(dropdown => {
 //--------------for adding Component-Tooltip----------------------
 //function to be called to show the tip tip on mouse hover start. 
 function showComponentToolTip(event) {
-  const tooltip = event.target.getAttribute('component-tooltip');// here we copied the text that was put as tool tip for that component. 
-  const tooltipElement = document.createElement('div');// creating the div element where we shall put the contents of tooltip variable from above.
-  tooltipElement.className = 'tooltip';//we are basically saying <div class="tooltip"></div> in this code.😊 we will use this class name in CSS. 
+  console.log('Called: showComponentToolTip');//Code Testing
+  const tooltip = event.target.getAttribute('component-tooltip');// here we copied the text that was put as tool tip for that component.
+  console.log('Tooltip text:',tooltip);//Code Testing
+   
+  let tooltipElement = document.createElement('div');// creating the div element where we shall put the contents of tooltip variable from above.
+  tooltipElement.className = 'component-tooltip';//we are basically saying <div class="tooltip"></div> in this code.😊 we will use this class name in CSS. 
   tooltipElement.textContent = tooltip;// copying the text into the <div></div> we created.
   //code upgrade👇🏼 document.body.appendChild(tooltipElement);//attaching our <div></div> item where the hower is commited.
-  event.target.appendChild(tooltipElement);
+  document.body.appendChild(tooltipElement);
 
-  setTimeout(() => {
   const positionalDimensionDataOfElement = event.target.getBoundingClientRect();
   //SuperNoteLearnByHeart: positionalDimensionDataOfElement now contains data & properties like left, top, right, bottom, width, and height of the target element.
-  tooltipElement.style.left = `${positionalDimensionDataOfElement.left + positionalDimensionDataOfElement.width/2 - tooltipElement.offsetWidth/2+20}px`;
-  tooltipElement.style.top = `${positionalDimensionDataOfElement.top + tooltipElement.offsetHeight-105}px`;
-  tooltipElement.style.opacity=1;
-  tooltipElement.style.transform = 'translateY(0)'},10);// Note: to introduce the time interval of appeance. 
-};
+  const tooltipDimensions= tooltipElement.getBoundingClientRect();
+
+  tooltipElement.style.left = `${positionalDimensionDataOfElement.left + positionalDimensionDataOfElement.width/2 - tooltipDimensions.width/2}px`;
+  tooltipElement.style.top = `${positionalDimensionDataOfElement.top - tooltipDimensions.height-10}px`;
+  
+  tooltipElement.offsetHeight;//to force a reflow
+  tooltipElement.classList.add('visible');
+  console.log('Tooltip element:', tooltipElement);//Code Testing
+  console.log('Tooltip style:',tooltipElement.style.cssText);//Code Testing
+  
+  
+};// newly added 19/08/2024
 // function to hide the tooltip if the hover ends. 
 function hideComponentToolTip() {
-  const componentTooltip = document.querySelector('.tooltip');
-  if (componentTooltip) {
-    componentTooltip.remove();
+  console.log('hideComponentToolTip called');// Code Testing
+  
+  const tooltipElement = document.querySelector('.component-tooltip');
+  if (tooltipElement) {
+    tooltipElement.classList.remove('visible');
+    setTimeout(() => tooltipElement.remove(),800);
   }
-};
+};// newly added 19/08/2024
 // here we are handling the part where the mouse pointer hover or leaves.
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {console.log('DOMContentLoaded event has been fired up🔫');//Code Testing
+
   const componenttooltipElement = document.querySelectorAll('[component-tooltip]');
+ console.log('Number of tooltip element found:', componenttooltipElement.length);//Code Testing
   
   componenttooltipElement.forEach(element => {
     element.addEventListener('mouseenter', showComponentToolTip);// becouse we don't have 'mousehover' event as such in JS . instead we use the event like when mouseenter and when mouseleave🧑🏼
     element.addEventListener('mouseleave', hideComponentToolTip);
   });
-});
+});// newly added 19/08/2024
 
 
 
