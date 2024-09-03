@@ -399,7 +399,8 @@
     /* Ensure the placeholder image is centered when no cities are displayed */
     .header__logo {
       display: block;
-      margin: auto;
+      /* margin: auto; */
+      /* margin-left: 0.5rem; */
       position: relative;
       top: 50%;
       transform: translateY(-50%);
