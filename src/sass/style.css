@@ -482,5 +482,28 @@
       transform: translateY(0);
     }
 
+    .developer-info {
+      position: relative;
+      margin-top: 50px;
+      text-align: left;
+      opacity: 0.5; 
+      pointer-events: none;
+      color: rgba(0, 0, 0, 0.7);
+  }
+  
+  .developer-info h3 {
+      margin: 0;
+      font-size: 14px;
+  }
+  
+  .developer-info a {
+      color: #67fc94;
+      text-decoration: none;
+      pointer-events: auto;
+  }
+  .developer-info a:hover {
+    text-decoration: underline;
+    opacity: 0.9; 
+}
     
 
