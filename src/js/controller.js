@@ -856,7 +856,48 @@ viewButton.addEventListener('click', async () => {
 //------To Add Download functionality. 😨Complicated thing. 
 
 const downloadButton = document.querySelector('.btn__3');
+async function downloadRecords(parameterObjData) {
+  console.log(parameterObjData);
+  try {
+    const response = await fetch(`${DOWNLOADRECORDS_API_URL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(parameterObjData),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let filename = 'SSCRADHE_downloaded_file.zip';
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+      }
+    }
 
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to download records. Please try again.');
+  }
+}
+/*legacy code👇code upgrade👆
 async function downloadRecords(parameterObjData) {
   console.log(parameterObjData);// Code Testing  
   try {
@@ -876,7 +917,7 @@ async function downloadRecords(parameterObjData) {
     
     // Get the filename from the Content-Disposition header
     const contentDisposition = response.headers.get('Content-Disposition');
-    let filename = 'data.zip'; // changes this filename for production
+    let filename = 'SSCRADHE_downloaded_file.zip'; // changes this filename for production
     if (contentDisposition) {
       const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
       if (filenameMatch) {
@@ -903,7 +944,7 @@ async function downloadRecords(parameterObjData) {
     alert('Failed to download records. Please try again.');
   }
 };
-
+*/
 downloadButton.addEventListener('click', async (e) => {
   e.preventDefault();
   const parameterSendingToApi = {...selectedValues};
