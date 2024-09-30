@@ -82,12 +82,12 @@ const examApplicants = {
 const parameterMap = {
   '1': 'EXAMNAME',
   '2': 'CAT1',
-  '3': 'SELECTED',
+  '3': 'SELECTED',//WRTN1_APP, WRTN1_QLY, WRTN2_APP, WRTN2_QLY, WRTN3_APP, WRTN3_QLY,INTVW_APP,SKILL_APP,SKILL_QLY, PET_APP, PET_QLY, DME_APP, DME_QLY, RME_APP, RME_QLY
   '4': 'ALLOC_CAT',
   '5': 'GENDER',
   '6': 'CAT2',
   '7': 'CAT3',
-};
+};// Note The parameters mentioned here have the same name as the names of the column in the database.Super but the order of their appearance is according to the order of the dropdown buttons in the frontend section. 
 
 // This is a function that will be used by the program to create template and enter the city names and their student counts.
 function updateExamCenters(cityStats) {

@@ -4,9 +4,9 @@
   "description": "this is the frontend part of allexamstable in postgre database query tool",
   "default": "index.js",
   "scripts": {
-   "start:dev": "pm2 start ecosystem.config.js --env development --no-daemon",
-  "start:prod": "pm2 start ecosystem.config.js --env production --no-daemon",
-        "stop": "pm2 stop ecosystem.config.js"
+    "start:dev": "pm2 start ecosystem.config.js --env development --no-daemon",
+    "start:prod": "pm2 start ecosystem.config.js --env production --no-daemon",
+    "stop": "pm2 stop ecosystem.config.js"
   },
   "author": "keshav kumar",
   "license": "ISC",
@@ -17,6 +17,7 @@
   "dependencies": {
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
+    "d3.js": "^0.0.2-security",
     "events": "^3.3.0",
     "os-browserify": "^0.3.0",
     "pg-promise": "^11.8.0",
