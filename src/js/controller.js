@@ -20,7 +20,7 @@ const examApplicants = {
   'CAPF-2019': 673292,
   'CAPF-2020': 674366,
   'CAPF-2022': 727110,
-  'CAPF-2023': 'N/A',  // No data provided
+  'CAPF-2023': 834466,  // No data provided
   'CGL-2016': 3803748,
   'CGL-2017': 2928826,
   'CGL-2018': 2597431,
@@ -28,20 +28,20 @@ const examApplicants = {
   'CGL-2020': 2209867,
   'CGL-2021': 1963324,
   'CGL-2022': 3355194,
-  'CGL-2023': 'N/A',  // No data provided
+  'CGL-2023': 2527369,// No data provided
   'CHSL-2017': 6111719,
   'CHSL-2018': 2968655,
   'CHSL-2019': 4168750,
   'CHSL-2020': 3898378,
   'CHSL-2021': 3669524,
   'CHSL-2022': 3197965,
-  'CHSL-2023': 'N/A',  // No data provided
+  'CHSL-2023': 3217298,  // No data provided
   'CONSTABLE-2018': 5236810,
   'CONSTABLE-2021': 7174579,
   'CONSTABLE-2022': 5359277,
   'DPCST-2016': 195860,
   'DPCST-2020': 2896045,
-  'DPCST-2023': 'N/A',  // No data provided
+  'DPCST-2023': 3243083,  // NoteNo data provided
   'DPDVR-2022': 194704,
   'HC(MIN)IN DP-2022': 2228593,
   'IMD-2017': 475093,
@@ -51,22 +51,22 @@ const examApplicants = {
   'JE-2019': 806078,
   'JE-2020': 667589,
   'JE-2022': 600775,
-  'JE-2023': 'N/A',  // No data provided
+  'JE-2023': 593027,  // No data provided
   'JHT-2016': 25298,
   'JHT-2017': 29131,
   'JHT-2018': 49651,
   'JHT-2019': 89821,
   'JHT-2020': 13515,
   'JHT-2022': 9444,
-  'JHT-2023': 'N/A',  // No data provided
-  'LDC-D-2017': 'N/A',  // No data provided
+  'JHT-2023': 8126, // No data provided
+  'LDC-D-2017': 'N/A', // No data provided
   'LDC-D-2018': 958,
   'MTS-2016': 6975285,
   'MTS-2019': 3869446,
   'MTS-2020': 4534810,
   'MTS-2021': 3797357,
-  'MTS-2022': 'N/A',  // No data provided
-  'MTS-2023': 'N/A',  // No data provided
+  'MTS-2022': 5521917,  // No data provided
+  'MTS-2023': 2608167,  // No data provided
   'SA_IMD-2022': 241276,
   'STENO-2016': 457680,
   'STENO-2017': 541900,
@@ -74,7 +74,7 @@ const examApplicants = {
   'STENO-2019': 513597,
   'STENO-2020': 512172,
   'STENO-2022': 498884,
-  'STENO-2023': 'N/A',  // No data provided
+  'STENO-2023': 508538,  // No data provided
   'STENO-D-2017': 435,
   'UDC-D-2017': 80
 };// in absence of data in database, we decided to hardcode the number of applicants for each exam. So we are putting the data in the script. 
@@ -82,12 +82,12 @@ const examApplicants = {
 const parameterMap = {
   '1': 'EXAMNAME',
   '2': 'CAT1',
-  '3': 'SELECTED',
+  '3': 'SELECTED',//WRTN1_APP, WRTN1_QLY, WRTN2_APP, WRTN2_QLY, WRTN3_APP, WRTN3_QLY,INTVW_APP,SKILL_APP,SKILL_QLY, PET_APP, PET_QLY, DME_APP, DME_QLY, RME_APP, RME_QLY
   '4': 'ALLOC_CAT',
   '5': 'GENDER',
   '6': 'CAT2',
   '7': 'CAT3',
-};
+};// Note The parameters mentioned here have the same name as the names of the column in the database.Super but the order of their appearance is according to the order of the dropdown buttons in the frontend section. 
 
 // This is a function that will be used by the program to create template and enter the city names and their student counts.
 function updateExamCenters(cityStats) {
@@ -170,7 +170,7 @@ function updateZoneCenters(zoneStats) {
 // Function to reset exam centers and show placeholder image
 function resetExamCenters() {
   const examCentersDiv = document.querySelector('.examcenters');
-  examCentersDiv.innerHTML = '<img src="/img/testing.png" alt="Logo" class="header__logo" />';
+  examCentersDiv.innerHTML = '<img src="/img/biglogossc.png" alt="Logo" class="header__logo" />';
 }
 
 // to select the names of the dropdown value in the dropdown menu and also rest it. 
@@ -220,7 +220,56 @@ dropdownContainers.forEach(dropdown => {
   span.setAttribute('data-default', span.textContent);
 });
 
+//--------------for adding Component-Tooltip----------------------
+//function to be called to show the tip tip on mouse hover start. 
+function showComponentToolTip(event) {
+  console.log('Called: showComponentToolTip');//Code Testing
+  const tooltip = event.target.getAttribute('component-tooltip');// here we copied the text that was put as tool tip for that component.
+  console.log('Tooltip text:',tooltip);//Code Testing
+   
+  let tooltipElement = document.createElement('div');// creating the div element where we shall put the contents of tooltip variable from above.
+  tooltipElement.className = 'component-tooltip';//we are basically saying <div class="tooltip"></div> in this code.😊 we will use this class name in CSS. 
+  tooltipElement.textContent = tooltip;// copying the text into the <div></div> we created.
+  //code upgrade👇🏼 document.body.appendChild(tooltipElement);//attaching our <div></div> item where the hower is commited.
+  document.body.appendChild(tooltipElement);
 
+  const positionalDimensionDataOfElement = event.target.getBoundingClientRect();
+  //SuperNoteLearnByHeart: positionalDimensionDataOfElement now contains data & properties like left, top, right, bottom, width, and height of the target element.
+  const tooltipDimensions= tooltipElement.getBoundingClientRect();
+
+  tooltipElement.style.left = `${positionalDimensionDataOfElement.left + positionalDimensionDataOfElement.width/2 - tooltipDimensions.width/2}px`;
+  tooltipElement.style.top = `${positionalDimensionDataOfElement.top - tooltipDimensions.height-10}px`;
+  
+  tooltipElement.offsetHeight;//to force a reflow
+  tooltipElement.classList.add('visible');
+  console.log('Tooltip element:', tooltipElement);//Code Testing
+  console.log('Tooltip style:',tooltipElement.style.cssText);//Code Testing
+  
+  
+};// newly added 19/08/2024
+// function to hide the tooltip if the hover ends. 
+function hideComponentToolTip() {
+  console.log('hideComponentToolTip called');// Code Testing
+  
+  const tooltipElement = document.querySelector('.component-tooltip');
+  if (tooltipElement) {
+    tooltipElement.classList.remove('visible');
+    setTimeout(() => tooltipElement.remove(),800);
+  }
+};// newly added 19/08/2024
+/*
+// here we are handling the part where the mouse pointer hover or leaves.
+document.addEventListener('DOMContentLoaded', () => {console.log('DOMContentLoaded event has been fired up🔫');//Code Testing
+
+  const componenttooltipElement = document.querySelectorAll('[component-tooltip]');
+ console.log('Number of tooltip element found:', componenttooltipElement.length);//Code Testing
+  
+  componenttooltipElement.forEach(element => {
+    element.addEventListener('mouseenter', showComponentToolTip);// becouse we don't have 'mousehover' event as such in JS . instead we use the event like when mouseenter and when mouseleave🧑🏼
+    element.addEventListener('mouseleave', hideComponentToolTip);
+  });
+});// newly added 19/08/2024
+*/
 
 
 
@@ -279,7 +328,7 @@ async function fetchVenueStat(parameterObjData) {
 }
 
 // async funtion to fetch the data to populate summmaytable
-let dataToBtn5, dataToBtn6;//newly added14/08/24
+let dataToBtn5, dataToBtn6;
 async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
   try {
     // const response = await fetch('http://127.0.0.1:3000/api/v1/summarytablestats?limit=316000&offset=0',
@@ -311,7 +360,7 @@ async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
     console.error('Error while fetching😵summary table stats:', error);
     resetSummaryTable();
   }
-};//newly added23/7/24
+};
 
 
 // to call fetchRecordCount() function every time i press OK button. Actually to set the value in the "<span></span>" element. 
@@ -344,7 +393,7 @@ okButton.addEventListener('click', async (e) => {
   await fetchVenueStat(parameterSendingToApi);
 
   //Fetching and updating the summary table in numbers by default
-  await fetchSummaryTable(parameterSendingToApi,'numbers');// newly added23/7/24
+  await fetchSummaryTable(parameterSendingToApi,'numbers');
 });
 
 // similarly CLEAR button functionaliyt
@@ -369,7 +418,7 @@ clearButton.addEventListener('click', (e) => {
   resetExamCenters();
 
   // to reset the summary table when clear button is clicked.
-  resetSummaryTable();//newly added23/7/24
+  resetSummaryTable();
 });
 // to initialize the span with value 0 every time page loads. looks neat. 
 document.getElementById('recordsOfData').textContent = '0';
@@ -379,14 +428,14 @@ document.addEventListener('DOMContentLoaded',()=>{resetExamCenters();});
 
 document.querySelector('.btn__5').addEventListener('click', (e)=>{
   e.preventDefault();
-  populateTable(dataToBtn5, 'numbers');//newly added14/08/24 we aren't calling API in this code upgrade to bypass the Issue that we found👇🏼
-});//newly added23/7/24//Issue Found: what is being sent in parameterSendingToApi json formate. Becouse the browser is saying that there is somekind of problem with it. Hence, i think, we need to defined the header for CORS error resolution and body of the json formate to solve the issue of proper key:value pair, that is being sent after this button is clicked. So the same for .btn__6 as well. But first let's see what's going out there in  parameterSendingToApi at this point. Issue Resolved: since backend is sending number and percentage data on first fetch itself, why do any more fetch. hence is simply used the data that came with the first fetch in fetchSummaryTable() function. after fetching the data, it sends the to populateTable() in the frontend side only. So i directly use the data comming and populateTable() when .btn__5 or .btn__6 are pressed.😎 And the CORS has been addressed in the backend. the is no such problem in my code as such. ⚡
+  populateTable(dataToBtn5, 'numbers');//we aren't calling API in this code upgrade to bypass the Issue that we found👇🏼
+});//Issue Found: what is being sent in parameterSendingToApi json formate. Becouse the browser is saying that there is somekind of problem with it. Hence, i think, we need to defined the header for CORS error resolution and body of the json formate to solve the issue of proper key:value pair, that is being sent after this button is clicked. So the same for .btn__6 as well. But first let's see what's going out there in  parameterSendingToApi at this point. Issue Resolved: since backend is sending number and percentage data on first fetch itself, why do any more fetch. hence is simply used the data that came with the first fetch in fetchSummaryTable() function. after fetching the data, it sends the to populateTable() in the frontend side only. So i directly use the data comming and populateTable() when .btn__5 or .btn__6 are pressed.😎 And the CORS has been addressed in the backend. the is no such problem in my code as such. ⚡
 
 document.querySelector('.btn__6').addEventListener('click', (e) =>{ 
   // console.log(dataToBtn6);//Code Testing
   e.preventDefault();
-  populateTable(dataToBtn6, 'percentage');//newly added14/08/24 code upgrade
-});//newly added23/7/24
+  populateTable(dataToBtn6, 'percentage');
+});
 
 //----- To Add Data View functionality. 
 // This function provides template to dress data comming from our API.

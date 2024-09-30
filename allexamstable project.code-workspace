@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../allexamstable_backend_project"
+		},
+		{
+			"path": "../d3jslessons"
 		}
 	],
 	"settings": {
