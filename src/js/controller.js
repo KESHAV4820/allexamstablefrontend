@@ -674,6 +674,8 @@ viewButton.addEventListener('click', async () => {
 function generateFormattedHTML(data) {
   const fields = ['EXAMNAME', 'REGID', 'ROLL', 'NAME', 'FATHERNAME', 'MOTHERNAME', 'DOB', 'GENDER', 'CAT1', 'CAT2', 'CAT3', 'WRTN1_APP', 'WRTN1_QLY', 'WRTN2_APP', 'WRTN2_QLY', 'WRTN3_APP', 'WRTN3_QLY', 'INTVW_APP', 'SKILL_APP', 'SKILL_QLY', 'PET_APP', 'PET_QLY', 'DME_APP', 'DME_QLY', 'RME_APP', 'RME_QLY', 'SELECTED', 'MARKS', 'ALLOC_POST', 'ALLOC_STAT', 'ALLOC_AREA', 'ALLOC_CAT', 'RANK', 'WITHHELD'];
 
+  console.log(data[0]);// Code Testing {EXAMNAME: 'AWO/TPO-2022', REGID: '40000295702', ROLL: '1402000028', NAME: 'SWEETY', FATHERNAME: 'MAHAVIR SINGH', …}
+
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -685,7 +687,7 @@ function generateFormattedHTML(data) {
         href="https://fonts.googleapis.com/css?family=Nunito+Sans:400,600,700"
         rel="stylesheet"
       />
-      <title>Exam Records</title>
+      <title>SSC Exam Records</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -732,7 +734,7 @@ function generateFormattedHTML(data) {
     </head>
     <body>
       <div class="container">
-        <h1>All Exams Records:</h1>
+        <h1>${data[0].EXAMNAME} Exam Records:</h1>
         <table>
           <thead>
             <tr>
@@ -921,7 +923,7 @@ async function downloadRecords(parameterObjData) {
     }
     
     const contentDisposition = response.headers.get('Content-Disposition');
-    let filename = 'SSCRADHE_downloaded_file.zip';
+    let filename = 'SSCEXAMRECORDS_downloaded_file.zip';
     if (contentDisposition) {
       const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
       if (filenameMatch) {
