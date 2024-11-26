@@ -79,6 +79,36 @@ const examApplicants = {
   'UDC-D-2017': 80
 };// in absence of data in database, we decided to hardcode the number of applicants for each exam. So we are putting the data in the script. 
 
+// This function is for the content loading Animation
+function showLoading(element) {
+  // First clear any existing loading animations
+  hideLoading(element);
+  
+  // Create loading animation container
+  const loadingContainer = document.createElement('div');
+  loadingContainer.className = 'loading-container';
+  loadingContainer.innerHTML = `
+    <div class="sscicon-spinner">
+      <img src="/img/ssc_logo_trans.png" alt="Loading" class="rotating-sscicon">
+    </div>
+    <div class="loading-text">Loading data...</div>
+  `;
+  
+  // Store original position if not already relative
+  if (getComputedStyle(element).position === 'static') {
+    element.style.position = 'relative';
+  }
+  
+  element.appendChild(loadingContainer);
+}
+
+function hideLoading(element) {
+  const existingLoader = element.querySelector('.loading-container');
+  if (existingLoader) {
+    existingLoader.remove();
+  }
+}
+
 const parameterMap = {
   '1': 'EXAMNAME',
   '2': 'CAT1',
@@ -366,6 +396,13 @@ async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
 // to call fetchRecordCount() function every time i press OK button. Actually to set the value in the "<span></span>" element. 
 okButton.addEventListener('click', async (e) => {
   e.preventDefault();
+
+const databaseOutput=document.querySelector('.databaseoutput');
+const summaryTable=document.querySelector('.summarytable');
+
+showLoading(databaseOutput);
+showLoading(summaryTable);
+
   const parameterSendingToApi = {};
   dropdownContainers.forEach(dropdown => {
     const span = dropdown.querySelector('.selected-value');
@@ -388,12 +425,17 @@ okButton.addEventListener('click', async (e) => {
   document.getElementById('noOfApplicant').textContent = applicantCount;
   console.log(parameterSendingToApi);//Code Testing
   
-  
-  // Fetching and update exam center stats
-  await fetchVenueStat(parameterSendingToApi);
-
-  //Fetching and updating the summary table in numbers by default
-  await fetchSummaryTable(parameterSendingToApi,'numbers');
+  try {
+    // Fetching and update exam center stats
+    await fetchVenueStat(parameterSendingToApi);
+    //Fetching and updating the summary table in numbers by default
+    await fetchSummaryTable(parameterSendingToApi,'numbers'); 
+  }catch (error) {
+   console.error('Error fetching data: ', error) 
+  }finally{
+    hideLoading(databaseOutput);
+    hideLoading(summaryTable);
+  }
 });
 
 // similarly CLEAR button functionaliyt
