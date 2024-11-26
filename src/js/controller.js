@@ -135,7 +135,7 @@ function updateExamCenters(cityStats) {
   // to create and appand city names and their counts
   for (const [city, data] of Object.entries(cityStats)) {
     const cityItem = document.createElement('div');
-    cityItem.className = 'city-item';// basically it means <div class="city-item"></div>
+    cityItem.className = `city-item ${city}`;// basically it means <div class="city-item"></div>
     cityItem.innerHTML = `
       <h3 class="city-name">${city}</h3>
       <p class="city-count">Candidates Count: <span>${data.count ?? 0}</span></p>
@@ -158,7 +158,7 @@ function updateStateExamCenters(state_Stats) {
   // to create and appand city names and their counts
   for (const [stateName, data] of Object.entries(state_Stats)) {
     const stateItem = document.createElement('div');
-    stateItem.className = 'state-item';// basically it means <div class="state-item"></div>
+    stateItem.className = `state-item ${stateName}`;// basically it means <div class="state-item"></div>
     stateItem.innerHTML = `
       <h3 class="state-name">${stateName}</h3>
       <p class="state-count">Candidates Count: <span>${data.count}</span></p>
@@ -184,7 +184,7 @@ function updateZoneCenters(zoneStats) {
   // to create and appand city names and their counts
   for (const [zoneName, data] of Object.entries(zoneStats)) {
     const zoneItem = document.createElement('div');
-    zoneItem.className = 'zone-item';// basically it means <div class="state-item"></div>
+    zoneItem.className = `zone-item ${zoneName}`;// basically it means <div class="state-item"></div>
     zoneItem.innerHTML = `
       <h3 class="state-name">${zoneName}</h3>
       <p class="state-count">Candidates Count: <span>${data.count}</span></p>
