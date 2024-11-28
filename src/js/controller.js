@@ -3,6 +3,7 @@
 // const {populateTable, resetSummaryTable} = require('./populateSummaryTable');
 import { populateTable,resetSummaryTable } from './populateSummaryTable.js';// newly added23/7/24
 import {SUMMARYTABLE_API_URL,SUMMARYTABLE_API_LIMIT,SUMMARYTABLE_API_OFFSET,VENUESTATS_API_URL,VENUESTATS_API_LIMIT,VENUESTATS_API_OFFSET, FETCHRECORDCOUNT_API_URL, VIEWRECORDS_API_URL, VIEWRECORDS_API_LIMIT, VIEWRECORDS_API_OFFSET, DOWNLOADRECORDS_API_URL} from './config.js';
+// import { resolve } from 'path-browserify';// Issue Found
 
 
 
@@ -103,7 +104,7 @@ function showLoading(element) {
   };
   
   element.appendChild(loadingContainer);
-  
+
 
   //Loading Percentages: this isn't real percentage loader. It's simulated one. I will implement real one latter on.
   const loadingText=loadingContainer.querySelector('.loading-text');
@@ -125,6 +126,13 @@ function hideLoading(element) {
     existingLoader.remove();
   }
 }
+
+function updateLoadingProgress(percentage) {
+  const loadingText=document.querySelector('.loading-text');
+  if (loadingText) {
+    loadingText.textContent=`Loading: ${percentage}%`;
+  }
+};
 
 const parameterMap = {
   '1': 'EXAMNAME',
@@ -343,6 +351,7 @@ async function fetchRecordCount(parameterObjData) {
 };
 
 // New async function to fetch venue statistics
+/* forced stopcode in progress👇🏼
 async function fetchVenueStat(parameterObjData) {
   try {
     // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=1170000&offset=0', {
@@ -373,6 +382,73 @@ async function fetchVenueStat(parameterObjData) {
     resetExamCenters();
   }
 }
+
+*/
+//code in progress
+async function fetchVenueStat(parameterObjData) {
+  return new Promise((ifresolved, ifrejected) => {	
+    const xhr = new XMLHttpRequest();
+
+    xhr.open('POST', `${VENUESTATS_API_URL}?limit=${VENUESTATS_API_LIMIT}&offset=${VENUESTATS_API_OFFSET}`, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    //here we are going to track the upload of the request, latter for download and then, together, the load percentage will be determined
+    xhr.upload.onprogress = (event) => {	
+      if (event.lengthComputable) {
+        const uploadProgress= Math.round((event.loaded/event.total)*50);
+        updateLoadingProgress(uploadProgress);
+      }
+    	};
+
+    //progress tracking for download
+    xhr.onprogress=(event) => {	
+      if (event.lengthComputable) {
+        const downloadProgress= Math.round(50+(event.loaded/event.total)*50);
+        updateLoadingProgress(downloadProgress);
+      }
+    	};
+
+      xhr.onload=async () => {	
+        try {
+          if (xhr.status === 200) {
+            const data = JSON.parse(xhr.responseText);
+            
+            // update loading to 100% when loading is done
+            updateLoadingProgress(100);
+
+            //Your existing data processing logic
+            if (data.records && data.records.city_stats) {
+              updateExamCenters(data.records.city_stats);
+              updateStateExamCenters(data.records.state_stats);
+              updateZoneCenters(data.records.zone_stats);
+            } else {
+              console.error('Unexpected data structure: ',data);
+              resetExamCenters();
+            };
+            resolve(data);
+          } else {
+            throw new Error("Network Response was not OK");
+          }
+        } catch (error) {
+          console.error('Error processing city stats:', error);
+          resetExamCenters();
+          updateLoadingProgress(0);
+          reject(error);
+        }
+      };
+
+      xhr.onerror = () => {	
+        console.error('Error fetching city stats');
+        resetExamCenters();
+        updateLoadingProgress(0);
+        reject(new Error('Network error'));
+      	};
+
+      //Send the request
+      xhr.send(JSON.stringify(parameterObjData));
+  	});
+}
+//
 
 // async funtion to fetch the data to populate summmaytable
 let dataToBtn5, dataToBtn6;
