@@ -107,6 +107,7 @@ function showLoading(element) {
 
 
   //Loading Percentages: this isn't real percentage loader. It's simulated one. I will implement real one latter on.
+  /*forced stop
   const loadingText=loadingContainer.querySelector('.loading-text');
   let progress = 0;
   const updateProgress= () => {	
@@ -118,6 +119,7 @@ function showLoading(element) {
     };
   	};
     updateProgress();
+    */
 }
 
 function hideLoading(element) {
@@ -386,7 +388,7 @@ async function fetchVenueStat(parameterObjData) {
 */
 //code in progress
 async function fetchVenueStat(parameterObjData) {
-  return new Promise((ifresolved, ifrejected) => {	
+  return new Promise((ifPromiseResolves,ifPromiseRejected) => {	
     const xhr = new XMLHttpRequest();
 
     xhr.open('POST', `${VENUESTATS_API_URL}?limit=${VENUESTATS_API_LIMIT}&offset=${VENUESTATS_API_OFFSET}`, true);
@@ -415,7 +417,11 @@ async function fetchVenueStat(parameterObjData) {
             
             // update loading to 100% when loading is done
             updateLoadingProgress(100);
-
+            // console.log(data);//Code Testing
+            // console.log(data.records);// Code Testing
+            // console.log(data.records.city_stats);// Code Testing
+            
+            
             //Your existing data processing logic
             if (data.records && data.records.city_stats) {
               updateExamCenters(data.records.city_stats);
@@ -425,7 +431,7 @@ async function fetchVenueStat(parameterObjData) {
               console.error('Unexpected data structure: ',data);
               resetExamCenters();
             };
-            resolve(data);
+            ifPromiseResolves(data);
           } else {
             throw new Error("Network Response was not OK");
           }
@@ -441,7 +447,7 @@ async function fetchVenueStat(parameterObjData) {
         console.error('Error fetching city stats');
         resetExamCenters();
         updateLoadingProgress(0);
-        reject(new Error('Network error'));
+        ifPromiseRejected(new Error('Network error'));
       	};
 
       //Send the request
@@ -505,7 +511,7 @@ showLoading(summaryTable);
       parameterSendingToApi[param] = value;
     }
   });
-    console.log('Selected Values:', JSON.stringify(parameterSendingToApi, null, 2));//VIECode Testing
+    // console.log('Selected Values:', JSON.stringify(parameterSendingToApi, null, 2));//VIECode Testing
 
   const recordCount = await fetchRecordCount(parameterSendingToApi);
   if (recordCount !== null) {
@@ -516,7 +522,7 @@ showLoading(summaryTable);
 
   const applicantCount = examApplicants[parameterSendingToApi.EXAMNAME] || 0;
   document.getElementById('noOfApplicant').textContent = applicantCount;
-  console.log(parameterSendingToApi);//Code Testing
+  // console.log(parameterSendingToApi);//Code Testing
   
   try {
     // Fetching and update exam center stats
