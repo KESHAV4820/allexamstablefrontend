@@ -94,7 +94,7 @@ function showLoading(element) {
           <div class="sscicon-spinner">
             <img src="/img/ssc_logo_trans.png" alt="Loading" class="rotating-sscicon">
           </div>
-      <div class="loading-text">Loading: 0% </div>
+      <div class="loading-text">Loading. Please Wait.</div>
     </div>
   `;
   
@@ -107,7 +107,8 @@ function showLoading(element) {
 
 
   //Loading Percentages: this isn't real percentage loader. It's simulated one. I will implement real one latter on.
-  /*forced stop
+  /*forced stop legacy code this is not to be used when implementing real percentage loader.
+
   const loadingText=loadingContainer.querySelector('.loading-text');
   let progress = 0;
   const updateProgress= () => {	
@@ -128,14 +129,14 @@ function hideLoading(element) {
     existingLoader.remove();
   }
 }
-
+/*legacy code
 function updateLoadingProgress(percentage) {
   const loadingText=document.querySelector('.loading-text');
   if (loadingText) {
     loadingText.textContent=`Loading: ${percentage}%`;
   }
 };
-
+*/
 const parameterMap = {
   '1': 'EXAMNAME',
   '2': 'CAT1',
@@ -353,7 +354,6 @@ async function fetchRecordCount(parameterObjData) {
 };
 
 // New async function to fetch venue statistics
-/* forced stopcode in progress👇🏼
 async function fetchVenueStat(parameterObjData) {
   try {
     // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=1170000&offset=0', {
@@ -385,8 +385,8 @@ async function fetchVenueStat(parameterObjData) {
   }
 }
 
-*/
-//code in progress
+
+/*Usless Coding forced stop: this code is working fine👍🏼. But, since my loading cycle of the content is only two stage, the upload appears in two stage, 50% for sending the request and 50% for receiving answer. I can change % weightage, but the progress show won't be continuous like 1% then 11% ...13%...24% till 100%. It will be show up in two stage only. Hence, i am suppressing the real percentage content. 
 async function fetchVenueStat(parameterObjData) {
   return new Promise((ifPromiseResolves,ifPromiseRejected) => {	
     const xhr = new XMLHttpRequest();
@@ -454,7 +454,7 @@ async function fetchVenueStat(parameterObjData) {
       xhr.send(JSON.stringify(parameterObjData));
   	});
 }
-//
+*/
 
 // async funtion to fetch the data to populate summmaytable
 let dataToBtn5, dataToBtn6;
@@ -496,10 +496,10 @@ async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
 okButton.addEventListener('click', async (e) => {
   e.preventDefault();
 
-const databaseOutput=document.querySelector('.databaseoutput');
+const examCentersDiv=document.querySelector('.examcenters');
 const summaryTable=document.querySelector('.summarytable');
 
-showLoading(databaseOutput);
+showLoading(examCentersDiv);
 showLoading(summaryTable);
 
   const parameterSendingToApi = {};
@@ -532,7 +532,7 @@ showLoading(summaryTable);
   }catch (error) {
    console.error('Error fetching data: ', error) 
   }finally{
-    hideLoading(databaseOutput);
+    hideLoading(examCentersDiv);
     hideLoading(summaryTable);
   }
 });

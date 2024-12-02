@@ -165,11 +165,6 @@
     }
     .databaseoutput{
       display: grid;
-      
-      /* newly added 26/11/2024 */
-      position: relative;
-      min-height: 100px;
-
 
       border-top-left-radius: 1.0125rem;
       border-bottom-right-radius: 1.0125rem;
@@ -477,6 +472,9 @@
       background-color: #f0f0f0;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+      position: relative;
+      min-height: 100px;
     }
     .examcenters img{
       width: auto;
