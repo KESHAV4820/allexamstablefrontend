@@ -6,6 +6,30 @@ import {SUMMARYTABLE_API_URL,SUMMARYTABLE_API_LIMIT,SUMMARYTABLE_API_OFFSET,VENU
 // import { resolve } from 'path-browserify';// Issue Found
 
 
+class RequestManager{
+    constructor(){
+      this.currentController = null;
+      this.clientId = null;
+    };
+
+    cancelOngoing(){
+      if (this.currentController) {
+        this.currentController.abort();
+        this.currentController = null;
+      };
+    };
+
+    getNewController(){
+      this.cancelOngoing();
+      this.currentController = new AbortController();
+      this.clientId = crypto.randomUUID();// generate unique ID for each request
+      return {controller: this.currentController, clientId: this.clientId};
+    };
+};
+
+const venueStatsRequestManager = new RequestManager();
+const summaryTableRequestManager = new RequestManager();
+
 
 /* --------for collecting the outputs of all dropdown menu---------- */
 
@@ -356,17 +380,29 @@ async function fetchRecordCount(parameterObjData) {
 // New async function to fetch venue statistics
 async function fetchVenueStat(parameterObjData) {
   try {
+      const {controller, clientId} = venueStatsRequestManager.getNewController();
+      console.log(clientId);//Code Testing
+      console.log(controller);// Code Testing
+      
+      
     // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=1170000&offset=0', {
       const response = await fetch(`${VENUESTATS_API_URL}?limit=${VENUESTATS_API_LIMIT}&offset=${VENUESTATS_API_OFFSET}`,{
     // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=300000&offset=0', {// Note this code is in my laptop workstation. the limit has been kept low becouse my system can't handle higher limits>11,70,000
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Client-Id': clientId
       },
       body: JSON.stringify(parameterObjData),
-    });
+      signal: controller.signal
+      }
+    );
 
     if (!response.ok) {
+      if (response.status === 499) {
+        console.log('Query cancelled by server');
+        return;
+      }
       throw new Error('Network response was not ok');
     };
 
@@ -380,6 +416,10 @@ async function fetchVenueStat(parameterObjData) {
       resetExamCenters();
     }
   } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('Fetch aborted by client');
+      return;
+    }
     console.error('Error fetching city stats:', error);
     resetExamCenters();
   }
@@ -460,17 +500,25 @@ async function fetchVenueStat(parameterObjData) {
 let dataToBtn5, dataToBtn6;
 async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
   try {
+    const {controller, clientId} = summaryTableRequestManager.getNewController();
     // const response = await fetch('http://127.0.0.1:3000/api/v1/summarytablestats?limit=316000&offset=0',
     const response = await fetch(`${SUMMARYTABLE_API_URL}?limit=${SUMMARYTABLE_API_LIMIT}&offset=${SUMMARYTABLE_API_OFFSET}`,
       {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Client-Id': clientId
       },
       body: JSON.stringify(parameterObjData),
-    });
+      signal: controller.signal
+    }
+  );
 
     if (!response.ok) {
+      if (response.status === 499) {
+        console.log('Query cancelled by server');
+        return;
+      }
       throw new Error('Failed to fetch the summarytablestats');
     }
 
@@ -486,6 +534,10 @@ async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
     dataToBtn6=data;//newly added14/08/24
 
   } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('Fetch aborted by client');
+      return;
+    }
     console.error('Error while fetching😵summary table stats:', error);
     resetSummaryTable();
   }
