@@ -29,6 +29,9 @@ class RequestManager{
 
 const venueStatsRequestManager = new RequestManager();
 const summaryTableRequestManager = new RequestManager();
+const viewRecordsRequestManager = new RequestManager();
+const downloadRecordsRequestManager = new RequestManager();
+const fetchRecordCountRequestManager = new RequestManager();
 
 
 /* --------for collecting the outputs of all dropdown menu---------- */
@@ -381,8 +384,8 @@ async function fetchRecordCount(parameterObjData) {
 async function fetchVenueStat(parameterObjData) {
   try {
       const {controller, clientId} = venueStatsRequestManager.getNewController();
-      console.log(clientId);//Code Testing
-      console.log(controller);// Code Testing
+      // console.log(clientId);//Code Testing
+      // console.log(controller);// Code Testing
       
       
     // const response = await fetch('http://127.0.0.1:3000/api/v1/venuerecords?limit=1170000&offset=0', {
