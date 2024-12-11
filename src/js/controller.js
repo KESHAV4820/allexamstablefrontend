@@ -225,8 +225,6 @@ function updateStateExamCenters(state_Stats) {
     examCentersDiv.appendChild(stateItem);
   }
 };
-
-
 function updateZoneCenters(zoneStats) {
   const examCentersDiv = document.querySelector('.examcenters');// this will remain the same for state or zone as it's the <div> where our city-item div or state-item div or zone-item div is present.
 
@@ -359,7 +357,39 @@ document.addEventListener('DOMContentLoaded', () => {console.log('DOMContentLoad
 
 
 //---- the function that will use the fetch function for API endpointVIE💀☠⚡----
+async function fetchRecordCount(parameterObjData) {
+  try {
+    const {controller, clientId} = fetchRecordCountRequestManager.getNewController();
+    
+    const response = await fetch(`${FETCHRECORDCOUNT_API_URL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Client-Id': clientId
+      },
+      body: JSON.stringify(parameterObjData),
+      signal: controller.signal
+    });
 
+    if (!response.ok) {
+      if (response.status === 499) {
+        console.log('Query cancelled by server');
+        return null;
+      }
+      throw new Error('Network response was not ok');
+    }
+
+    return await response.json();
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('Fetch aborted by client');
+      return null;
+    }
+    console.error('Error fetching record count:', error);
+    return null;
+  }
+}//newly added 11/12/2024
+/*legacy code
 async function fetchRecordCount(parameterObjData) {
   try {
     const response = await fetch(`${FETCHRECORDCOUNT_API_URL}`,
@@ -379,6 +409,7 @@ async function fetchRecordCount(parameterObjData) {
     return null;
   }
 };
+*/
 
 // New async function to fetch venue statistics
 async function fetchVenueStat(parameterObjData) {
@@ -965,7 +996,9 @@ try {//beyond limit=35000, even HPZ2 started failing. heap out of memory thing.
       },
       body: JSON.stringify(parameterObjData),
     });
+    // console.log(data);//Code Testing
     const data = await response.json();
+    
     
     const newTab = window.open('', '_blank');
     newTab.document.write(generateFormattedHTML(data));//Issue Found
