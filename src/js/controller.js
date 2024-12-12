@@ -986,7 +986,7 @@ function generateFormattedHTML(data) {
 const viewButton = document.querySelector('.btn__4');
 //here we are calling the api endpoint in viewRecords function
 async function viewRecords(parameterObjData){
-try {//beyond limit=35000, even HPZ2 started failing. heap out of memory thing.
+try {
     // const response = await fetch('http://127.0.0.1:3000/api/v1/records?limit=35000&offset=0',
       const response = await fetch(`${VIEWRECORDS_API_URL}?limit=${VIEWRECORDS_API_LIMIT}&offset=${VIEWRECORDS_API_OFFSET}`,
       {
@@ -1025,7 +1025,7 @@ viewButton.addEventListener('click', async (e) => {
 
 const downloadButton = document.querySelector('.btn__3');
 async function downloadRecords(parameterObjData) {
-  console.log(parameterObjData);
+  console.log(parameterObjData);// Code Testing
   try {
     const response = await fetch(`${DOWNLOADRECORDS_API_URL}`, {
       method: 'POST',
@@ -1064,7 +1064,65 @@ async function downloadRecords(parameterObjData) {
     console.error('Error:', error);
     alert('Failed to download records. Please try again.');
   }
+};
+/*Alternative Code this code isn't being used becouse you are already sure about your intent to download the data, you don't need the setup for instant query abort system.
+const downloadButton = document.querySelector('.btn__3');
+async function downloadRecords(parameterObjData) {
+  console.log(parameterObjData);// Code Testing
+
+  try {
+    const {controller,clientId} = downloadRecordsRequestManager.getNewController();
+
+    const response = await fetch(`${DOWNLOADRECORDS_API_URL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Client-Id':clientId
+      },
+      body: JSON.stringify(parameterObjData),
+      signal: controller.signal
+    });
+    
+    if (!response.ok) {
+      if (response.status === 499) {
+        console.log('Query cancelled by server');
+        return;
+      }
+      throw new Error('Network response was not ok');
+    }
+    
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let filename = 'SSCEXAMRECORDS_downloaded_file.zip';
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+      }
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('Fetch for download was aborted by client');
+      return;
+    }
+    console.error('Error:', error);
+    alert('Failed to download records. Please try again.');
+  }
 }
+*/
+
 /*legacy code👇code upgrade👆
 async function downloadRecords(parameterObjData) {
   console.log(parameterObjData);// Code Testing  
