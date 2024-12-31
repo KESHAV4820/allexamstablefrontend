@@ -1,3 +1,5 @@
+import { VIEWRECORDSBYSTREAMING_API_URL, VIEWRECORDSBYSTREAMING_BATCHSIZE } from "./config.js";
+
 // viewDataStreamingModule.js
 
 // Constants
@@ -16,7 +18,7 @@ const RECORD_FIELDS = [
 class StreamingRecordsManager {
     constructor(filterParams, fields = RECORD_FIELDS) {
         // Configuration of API URL and default fields for the records
-        this.apiUrl = `http://127.0.0.1:3000/api/v1/records-stream`;
+        this.apiUrl = `${VIEWRECORDSBYSTREAMING_API_URL}`;
         this.filterParams = filterParams;
         this.fields = fields;
         
@@ -24,7 +26,7 @@ class StreamingRecordsManager {
         this.isLoading = false; // Tracks if records are being fetched
         this.hasMore = true; // Indicates if there are more records to load
         this.currentOffset = 0; // Tracks the offset for fetching records
-        this.batchSize = 50; // Number of records to fetch per batch
+        this.batchSize = `${VIEWRECORDSBYSTREAMING_BATCHSIZE}`;//50; // Number of records to fetch per batch
         this.abortController = null; // Controller to cancel ongoing requests
         this.allRecords = []; // Stores all fetched records
         this.newTab = null; // Reference to the new browser tab for the stream
