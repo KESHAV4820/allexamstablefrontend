@@ -3,6 +3,7 @@
 // const {populateTable, resetSummaryTable} = require('./populateSummaryTable');
 import { populateTable,resetSummaryTable } from './populateSummaryTable.js';// newly added23/7/24
 import {SUMMARYTABLE_API_URL,SUMMARYTABLE_API_LIMIT,SUMMARYTABLE_API_OFFSET,VENUESTATS_API_URL,VENUESTATS_API_LIMIT,VENUESTATS_API_OFFSET, FETCHRECORDCOUNT_API_URL, VIEWRECORDS_API_URL, VIEWRECORDS_API_LIMIT, VIEWRECORDS_API_OFFSET, DOWNLOADRECORDS_API_URL} from './config.js';
+import { createStreamingView } from './viewDataStreamingModule.js';
 // import { resolve } from 'path-browserify';// Issue Found
 
 
