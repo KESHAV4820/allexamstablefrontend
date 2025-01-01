@@ -174,6 +174,9 @@ class StreamingRecordsManager {
         const container = this.newTab.document.getElementById('records-container'); // Finds the container
         if (!container) return;
 
+        console.log('Records to render:', this.allRecords);// Code Testing
+        
+
         if (!append) {
             container.innerHTML = generateFormattedHTML(this.allRecords); // Replaces content
         } else {

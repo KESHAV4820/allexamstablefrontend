@@ -1,7 +1,10 @@
+
+/*forced stop original working code
 function generateFormattedHTML(data) {
     const fields = ['EXAMNAME', 'REGID', 'ROLL', 'NAME', 'FATHERNAME', 'MOTHERNAME', 'DOB', 'GENDER', 'CAT1', 'CAT2', 'CAT3', 'WRTN1_APP', 'WRTN1_QLY', 'WRTN2_APP', 'WRTN2_QLY', 'WRTN3_APP', 'WRTN3_QLY', 'INTVW_APP', 'SKILL_APP', 'SKILL_QLY', 'PET_APP', 'PET_QLY', 'DME_APP', 'DME_QLY', 'RME_APP', 'RME_QLY', 'SELECTED', 'MARKS', 'ALLOC_POST', 'ALLOC_STAT', 'ALLOC_AREA', 'ALLOC_CAT', 'RANK', 'WITHHELD'];
   
     // console.log(data[0]);// Code Testing {EXAMNAME: 'AWO/TPO-2022', REGID: '40000295702', ROLL: '1402000028', NAME: 'SWEETY', FATHERNAME: 'MAHAVIR SINGH', …}
+    
   
     return `
       <!DOCTYPE html>
@@ -81,5 +84,60 @@ function generateFormattedHTML(data) {
       </html>
     `;
   };
+ */ 
+
+  function generateFormattedHTML(data) {
+    const fields = ['EXAMNAME', 'REGID', 'ROLL', 'NAME', 'FATHERNAME', 'MOTHERNAME', 'DOB', 'GENDER', 'CAT1', 'CAT2', 'CAT3', 'WRTN1_APP', 'WRTN1_QLY', 'WRTN2_APP', 'WRTN2_QLY', 'WRTN3_APP', 'WRTN3_QLY', 'INTVW_APP', 'SKILL_APP', 'SKILL_QLY', 'PET_APP', 'PET_QLY', 'DME_APP', 'DME_QLY', 'RME_APP', 'RME_QLY', 'SELECTED', 'MARKS', 'ALLOC_POST', 'ALLOC_STAT', 'ALLOC_AREA', 'ALLOC_CAT', 'RANK', 'WITHHELD'];
   
+    console.log('Data received in generateFormattedHTML:', data); // Add this line
+    
+    if (!Array.isArray(data) || data.length === 0) {
+        return '<div class="container"><h1>No records found</h1></div>';
+    }
+
+    try {
+        return `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+                <title>SSC Exam Records</title>
+                <style>
+                    /* ... your existing styles ... */
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>${data[0]?.EXAMNAME || 'Exam'} Records</h1>
+                    <table>
+                        <thead>
+                            <tr>
+                                ${fields.map(field => `<th>${field}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(record => `
+                                <tr>
+                                    ${fields.map(field => `<td>${record[field] || ''}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </body>
+            </html>
+        `;
+    } catch (error) {
+        console.error('Error generating HTML:', error);
+        return `
+            <div class="container">
+                <h1>Error displaying records</h1>
+                <p>Error: ${error.message}</p>
+            </div>
+        `;
+    }
+}
+
   export {generateFormattedHTML};
