@@ -2,8 +2,9 @@
 // SuperNote: always push the code to git after pulling the code from repo. code for pulling the code is 👉 git pull origin mirrorverse . where mirror verse is the name of the branch. you need to tell this or it will throw warning/error message.
 // const {populateTable, resetSummaryTable} = require('./populateSummaryTable');
 import { populateTable,resetSummaryTable } from './populateSummaryTable.js';// newly added23/7/24
-import {SUMMARYTABLE_API_URL,SUMMARYTABLE_API_LIMIT,SUMMARYTABLE_API_OFFSET,VENUESTATS_API_URL,VENUESTATS_API_LIMIT,VENUESTATS_API_OFFSET, FETCHRECORDCOUNT_API_URL, VIEWRECORDS_API_URL, VIEWRECORDS_API_LIMIT, VIEWRECORDS_API_OFFSET, DOWNLOADRECORDS_API_URL} from './config.js';
+import {SUMMARYTABLE_API_URL,SUMMARYTABLE_API_LIMIT,SUMMARYTABLE_API_OFFSET,VENUESTATS_API_URL,VENUESTATS_API_LIMIT,VENUESTATS_API_OFFSET, FETCHRECORDCOUNT_API_URL, VIEWRECORDS_API_URL, VIEWRECORDS_API_LIMIT, VIEWRECORDS_API_OFFSET, DOWNLOADRECORDS_API_URL, VIEWRECORDSBYSTREAMING_API_URL} from './config.js';
 import { createStreamingView } from './viewDataStreamingModule.js';
+import { generateFormattedHTML } from "./dataViewingHtmlFormatter.js";
 // import { resolve } from 'path-browserify';// Issue Found
 
 
@@ -898,7 +899,8 @@ viewButton.addEventListener('click', async () => {
 });
 */
 
-//working code
+//working code code migrated to module dataViewingHtmlFormatter.js
+/*
 function generateFormattedHTML(data) {
   const fields = ['EXAMNAME', 'REGID', 'ROLL', 'NAME', 'FATHERNAME', 'MOTHERNAME', 'DOB', 'GENDER', 'CAT1', 'CAT2', 'CAT3', 'WRTN1_APP', 'WRTN1_QLY', 'WRTN2_APP', 'WRTN2_QLY', 'WRTN3_APP', 'WRTN3_QLY', 'INTVW_APP', 'SKILL_APP', 'SKILL_QLY', 'PET_APP', 'PET_QLY', 'DME_APP', 'DME_QLY', 'RME_APP', 'RME_QLY', 'SELECTED', 'MARKS', 'ALLOC_POST', 'ALLOC_STAT', 'ALLOC_AREA', 'ALLOC_CAT', 'RANK', 'WITHHELD'];
 
@@ -982,7 +984,7 @@ function generateFormattedHTML(data) {
     </html>
   `;
 }; 
-
+*/
 
 const viewButton = document.querySelector('.btn__4');
 //here we are calling the api endpoint in viewRecords function
@@ -1012,12 +1014,46 @@ try {
 console.log(selectedValues);//Code Testing
 
 
+export async function viewRecordsByStreaming(parameterObjData) {
+    try {
+        const response = await fetch(`${VIEWRECORDSBYSTREAMING_API_URL}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            // body: JSON.stringify(req.body),//this is suppressed becouse of req.body; we need to know why?
+            body: JSON.stringify(parameterObjData),
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to initialize stream');
+        }
+
+        // createStreamingView(req.body);
+        if (response.body) {// Concept if statment is being used so that stream is created only after we have data to stream, not before it.
+          createStreamingView(parameterObjData);
+          return;
+        }
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error('Failed to view records:', error);
+        alert('Failed to initialize stream. Please try again.');
+        // res.status(500).json({ 
+        //     success: false, 
+        //     error: error.message 
+        // });
+    }
+};
+
 //here eventlisteners are being pasted upon the ViewButton.
 viewButton.addEventListener('click', async (e) => {
   e.preventDefault();
   const parameterSendingToApi = {...selectedValues};
   console.log(parameterSendingToApi, selectedValues);//Code Testing
-  await viewRecords(parameterSendingToApi);
+  // await viewRecords(parameterSendingToApi);// forced stop to test the function viewRecordsByStreaming()
+  await viewRecordsByStreaming(parameterSendingToApi);
 });
 
 

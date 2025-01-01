@@ -1,4 +1,5 @@
 import { VIEWRECORDSBYSTREAMING_API_URL, VIEWRECORDSBYSTREAMING_BATCHSIZE } from "./config.js";
+import { generateFormattedHTML } from "./dataViewingHtmlFormatter.js";
 
 // viewDataStreamingModule.js
 
