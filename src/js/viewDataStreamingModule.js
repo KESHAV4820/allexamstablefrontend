@@ -37,6 +37,8 @@ class StreamingRecordsManager {
         this.scrollThreshold = 200; // Pixels from the bottom to trigger loading
         this.handleScroll = this.debounce(this.checkScrollPosition.bind(this), 150); // Debounced scroll handler
         this.cleanup = this.cleanup.bind(this); // Ensures proper cleanup of resources
+        this.totalRecords = null;
+        this.recordsReceived = 0;
         
         this.init(); // Initialize the streaming process
     }
@@ -188,6 +190,14 @@ class StreamingRecordsManager {
 
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); // Handles errors
 
+            // Get total records count from header if available
+            if (this.totalRecords=== null) {
+                const totalCount = response.headers.get('X-Total-Count');
+                if (totalCount) {
+                    this.totalRecords=parseInt(totalCount, 10);
+                };
+            };
+
             let recordCount = 0;
             const reader = response.body
                 .pipeThrough(new TextDecoderStream()) // Decodes the response stream
@@ -211,11 +221,19 @@ class StreamingRecordsManager {
                     .filter(Boolean); // Removes null values
 
                 recordCount += records.length; // Updates the record count
+                this.recordsReceived += records.length;
                 this.allRecords.push(...records); // Adds new records to the main array
                 this.renderRecords(true); // Renders the new records
             }
 
-            this.hasMore = recordCount >= this.batchSize; // Checks if more records are available
+            //Update hasMore based on total records if available
+            if (this.totalRecords !== null) {
+                this.hasMore = this.recordsReceived < this.totalRecords;
+            } else {
+                //Fallback to batch size check
+                this.hasMore = recordCount >= this.batchSize;
+            }
+            
             this.currentOffset += recordCount; // Updates the offset for the next batch
 
         } catch (error) {
@@ -267,16 +285,19 @@ class StreamingRecordsManager {
 
         const loadingElement = this.newTab.document.getElementById('loading'); // Finds the loading element
         if (loadingElement) {
-            loadingElement.textContent = this.isLoading 
-                ? 'Loading more records...' // Loading state
-                : this.hasMore 
-                    ? 'Scroll for more' // Prompt to scroll for more records
-                    : 'No more records'; // Indicates no more records are available
+            let message = this.isLoading ? 'Loading more records...' : '';
+            if (!this.hasMore) {
+                message = `All ${this.recordsReceived} records loaded`;
+            } else if (!this.isLoading) {
+                message = 'Scroll for more';
+            }
+            loadingElement.textContent = message;
         }
 
         const countElement = this.newTab.document.getElementById('records-count'); // Finds the record count element
         if (countElement) {
-            countElement.textContent = `Records: ${this.allRecords.length}`; // Updates the record count
+            const totalText = this.totalRecords ? `/${this.totalRecords}`:'';
+            countElement.textContent = `Records: ${this.recordsReceived} ${totalText}`; // Updates the record count
         }
     };
 
