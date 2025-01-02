@@ -19,7 +19,7 @@ const RECORD_FIELDS = [
 class StreamingRecordsManager {
     constructor(filterParams, fields = RECORD_FIELDS) {
         // Configuration of API URL and default fields for the records
-        this.apiUrl = `${VIEWRECORDSBYSTREAMING_API_URL}`;
+        this.apiUrl =VIEWRECORDSBYSTREAMING_API_URL;
         this.filterParams = filterParams;
         this.fields = fields;
         
@@ -27,7 +27,7 @@ class StreamingRecordsManager {
         this.isLoading = false; // Tracks if records are being fetched
         this.hasMore = true; // Indicates if there are more records to load
         this.currentOffset = 0; // Tracks the offset for fetching records
-        this.batchSize = `${VIEWRECORDSBYSTREAMING_BATCHSIZE}`;//50; // Number of records to fetch per batch
+        this.batchSize = VIEWRECORDSBYSTREAMING_BATCHSIZE;//50; // Number of records to fetch per batch
         this.abortController = null; // Controller to cancel ongoing requests
         this.allRecords = []; // Stores all fetched records
         this.newTab = null; // Reference to the new browser tab for the stream
@@ -41,6 +41,101 @@ class StreamingRecordsManager {
         this.init(); // Initialize the streaming process
     }
 
+    // Sets up the basic HTML for the streaming tab
+    setupInitialHTML() {
+        const css = `
+            body { 
+                font-family: Arial, sans-serif; 
+                margin: 0; 
+                padding: 20px; 
+                background-color: #f4f4f4;
+            }
+            #loading { 
+                text-align: center; 
+                padding: 20px; 
+                position: sticky;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.9);
+            }
+            .error { 
+                color: red; 
+                text-align: center; 
+                padding: 20px; 
+            }
+            #records-count { 
+                position: fixed; 
+                top: 10px; 
+                right: 10px; 
+                background: #333; 
+                color: white; 
+                padding: 5px 10px; 
+                border-radius: 5px;
+                z-index: 1000;
+            }
+            .container {
+                max-width: 100%;
+                margin: 0 auto;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                overflow-x: auto;
+            }
+            .records-wrapper {
+                margin-bottom: 20px;
+            }
+            h2 {
+                color: #333;
+                text-align: center;
+                margin: 20px 0;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            th, td {
+                padding: 8px;
+                border: 1px solid #ddd;
+                text-align: left;
+                font-size: 14px;
+            }
+            th {
+                background-color: #f2f2f2;
+                font-weight: bold;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            tr:hover {
+                background-color: #f5f5f5;
+            }
+        `;
+
+        const html = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Streaming Records</title>
+                <style>${css}</style>
+            </head>
+            <body>
+                <div id="records-count">Records: 0</div>
+                <div class="container"></div>
+                <div id="loading">Starting stream...</div>
+            </body>
+            </html>
+        `;
+
+        this.newTab.document.write(html);
+        this.newTab.document.close();
+    };
+
     // Initialization logic, opens a new tab and sets up event listeners
     init() {
         this.newTab = window.open('', '_blank'); // Opens a new blank tab
@@ -48,41 +143,7 @@ class StreamingRecordsManager {
         this.newTab.addEventListener('scroll', this.handleScroll); // Adds a scroll event listener
         window.addEventListener('unload', this.cleanup); // Ensures cleanup when the window is unloaded
         this.loadMoreRecords(); // Starts loading records immediately
-    }
-
-    // Sets up the basic HTML for the streaming tab
-    setupInitialHTML() {
-        this.newTab.document.write(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Streaming Records</title>
-                <style>
-                    /* Basic styles for the streaming page */
-                    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                    #loading { text-align: center; padding: 20px; }
-                    .error { color: red; text-align: center; padding: 20px; }
-                    #records-count { 
-                        position: fixed; 
-                        top: 10px; 
-                        right: 10px; 
-                        background: #333; 
-                        color: white; 
-                        padding: 5px 10px; 
-                        border-radius: 5px; 
-                    }
-                </style>
-            </head>
-            <body>
-                <div id="loading">Starting stream...</div> <!-- Loading indicator -->
-                <div id="records-count">Records: 0</div> <!-- Displays the number of records -->
-                <div id="records-container"></div> <!-- Container for the record content -->
-            </body>
-            </html>
-        `);
-    }
+    };
 
     // Checks the scroll position and loads more records if near the bottom
     checkScrollPosition() {
@@ -171,7 +232,8 @@ class StreamingRecordsManager {
     renderRecords(append = false) {
         if (!this.newTab || this.newTab.closed) return;
 
-        const container = this.newTab.document.getElementById('records-container'); // Finds the container
+        const container = this.newTab.document.querySelector('.container'); // Finds the container
+        // const container = this.newTab.document.querySelector('.container');
         if (!container) return;
 
         console.log('Records to render:', this.allRecords);// Code Testing
@@ -180,12 +242,21 @@ class StreamingRecordsManager {
         if (!append) {
             container.innerHTML = generateFormattedHTML(this.allRecords); // Replaces content
         } else {
-            const tempContainer = this.newTab.document.createElement('div'); // Temporary container
-            tempContainer.innerHTML = generateFormattedHTML(
-                this.allRecords.slice(-this.batchSize) // Gets the latest batch of records
-            );
-            container.appendChild(tempContainer.firstElementChild); // Appends new records
-        }
+            const tempContainer = this.newTab.document.createElement('div');
+            const newRecords = this.allRecords.slice(-this.batchSize);
+            tempContainer.innerHTML = generateFormattedHTML(newRecords);
+            
+            // Find the existing table or create a new one
+            let existingTable = container.querySelector('table');
+            if (!existingTable) {
+                container.appendChild(tempContainer.firstElementChild);
+            } else {
+                // Append only the new rows to the existing table
+                const newRows = tempContainer.querySelectorAll('tbody tr');
+                const tbody = existingTable.querySelector('tbody');
+                newRows.forEach(row => tbody.appendChild(row));
+            }
+        };
 
         this.updateLoadingState(); // Updates the UI state
     }
@@ -207,7 +278,7 @@ class StreamingRecordsManager {
         if (countElement) {
             countElement.textContent = `Records: ${this.allRecords.length}`; // Updates the record count
         }
-    }
+    };
 
     // Handles errors during streaming
     handleError(error) {
@@ -220,7 +291,7 @@ class StreamingRecordsManager {
                 <button onclick="window.location.reload()">Retry</button> <!-- Retry button -->
             </div>
         `;
-    }
+    };
 
     // Debounces a function to limit how often it runs
     debounce(func, wait) {
@@ -229,7 +300,7 @@ class StreamingRecordsManager {
             clearTimeout(timeout); // Clears any existing timeout
             timeout = setTimeout(() => func.apply(this, args), wait); // Sets a new timeout
         };
-    }
+    };
 
     // Cleans up resources and closes the streaming tab
     cleanup() {
@@ -243,7 +314,7 @@ class StreamingRecordsManager {
         }
 
         window.removeEventListener('unload', this.cleanup); // Removes the unload listener
-    }
+    };
 }
 
 // Exported function to create a new streaming view instance
