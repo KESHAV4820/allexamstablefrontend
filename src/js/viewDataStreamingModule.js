@@ -29,16 +29,16 @@ class StreamingRecordsManager {
         this.currentOffset = 0; // Tracks the offset for fetching records
         this.batchSize = VIEWRECORDSBYSTREAMING_BATCHSIZE;//50; // Number of records to fetch per batch
         this.abortController = null; // Controller to cancel ongoing requests
-        this.allRecords = []; // Stores all fetched records
+        this.allRecords = new Set();//[]; // Stores all unique fetched records
         this.newTab = null; // Reference to the new browser tab for the stream
-        this.recordBuffer = []; // Temporary buffer for records
+        // this.recordBuffer = []; // Temporary buffer for records
         
         // Scroll behavior settings
         this.scrollThreshold = 200; // Pixels from the bottom to trigger loading
         this.handleScroll = this.debounce(this.checkScrollPosition.bind(this), 150); // Debounced scroll handler
         this.cleanup = this.cleanup.bind(this); // Ensures proper cleanup of resources
         this.totalRecords = null;
-        this.recordsReceived = 0;
+        // this.recordsReceived = 0;
         
         this.init(); // Initialize the streaming process
     }
@@ -169,10 +169,10 @@ class StreamingRecordsManager {
         try {
             if (this.abortController) {
                 this.abortController.abort(); // Cancels any ongoing fetch
-            }
+            };
 
             this.abortController = new AbortController(); // Creates a new abort controller
-            
+                
             // Makes a POST request to fetch records with the filter parameters
             const response = await fetch(this.apiUrl, {
                 method: 'POST',
@@ -195,10 +195,11 @@ class StreamingRecordsManager {
                 const totalCount = response.headers.get('X-Total-Count');
                 if (totalCount) {
                     this.totalRecords=parseInt(totalCount, 10);
+                    console.log(`Total records to fetch: ${this.totalRecords}`);
                 };
             };
 
-            let recordCount = 0;
+            let newRecordsCount = 0;
             const reader = response.body
                 .pipeThrough(new TextDecoderStream()) // Decodes the response stream
                 .getReader(); // Reads the decoded stream
@@ -220,48 +221,69 @@ class StreamingRecordsManager {
                     })
                     .filter(Boolean); // Removes null values
 
-                recordCount += records.length; // Updates the record count
-                this.recordsReceived += records.length;
-                this.allRecords.push(...records); // Adds new records to the main array
-                this.renderRecords(true); // Renders the new records
-            }
+                // Add new records to Set to prevent duplicates
+                records.forEach(record => {
+                    if (!this.recordExists(record)) {
+                        this.allRecords.add(record);
+                        newRecordsCount++;
+                    };
+                });
+                console.log(`Current records count: ${this.allRecords.size} out of ${this.totalRecords}`);
+                
+                //Update hasMore based on total records if available
+                if (this.totalRecords !== null) {
+                    this.hasMore = this.allRecords.size < this.totalRecords;
+                }; 
+            // Only render if we have new records
+                if (newRecordsCount > 0) {
+                    this.renderRecords(true);
+                };
 
-            //Update hasMore based on total records if available
-            if (this.totalRecords !== null) {
-                this.hasMore = this.recordsReceived < this.totalRecords;
-            } else {
-                //Fallback to batch size check
-                this.hasMore = recordCount >= this.batchSize;
-            }
+                // recordCount += records.length; // Updates the record count
+                // this.recordsReceived += records.length;
+                // this.allRecords.push(...records); // Adds new records to the main array
+                // this.renderRecords(true); // Renders the new records
+            };
             
-            this.currentOffset += recordCount; // Updates the offset for the next batch
+            this.currentOffset = this.allRecords.size; // Updates the offset for the next batch
 
-        } catch (error) {
-            if (error.name === 'AbortError') return; // Ignores abort errors
-            this.handleError(error); // Handles other errors
-        } finally {
-            this.isLoading = false; // Resets the loading state
-            this.abortController = null; // Clears the abort controller
-            this.updateLoadingState(); // Updates the loading UI
-        }
-    }
 
+            } catch (error) {
+                if (error.name === 'AbortError') return;
+                this.handleError(error);
+            }finally{
+                this.isLoading = false;
+                this.abortController = null;
+                this.updateLoadingState();
+            };
+
+        };
+
+    recordExists(newRecord){
+        //checking if record already exists based on unique identifier (e.g., REGID or ROLL or combination of two)
+        return Array.from(this.allRecords).some(existingRecord => existingRecord.REGID === newRecord.REGID && 
+            existingRecord.ROLL === newRecord.ROLL
+        );
+    };
     // Renders records in the streaming tab
     renderRecords(append = false) {
         if (!this.newTab || this.newTab.closed) return;
 
         const container = this.newTab.document.querySelector('.container'); // Finds the container
-        // const container = this.newTab.document.querySelector('.container');
         if (!container) return;
 
-        console.log('Records to render:', this.allRecords);// Code Testing
+        // console.log('Records to render:', this.allRecords);// Code Testing
+
+        const recordsArray = Array.from(this.allRecords);
+        console.log('Records to render:', recordsArray);//Code Testing
         
 
         if (!append) {
-            container.innerHTML = generateFormattedHTML(this.allRecords); // Replaces content
+            container.innerHTML = generateFormattedHTML(recordsArray); // Replaces content
         } else {
+            const batchStart = Math.max(0, recordsArray.length - this.batchSize);
+            const newRecords = recordsArray.slice(batchStart);
             const tempContainer = this.newTab.document.createElement('div');
-            const newRecords = this.allRecords.slice(-this.batchSize);
             tempContainer.innerHTML = generateFormattedHTML(newRecords);
             
             // Find the existing table or create a new one
@@ -270,13 +292,13 @@ class StreamingRecordsManager {
                 container.appendChild(tempContainer.firstElementChild);
             } else {
                 // Append only the new rows to the existing table
-                const newRows = tempContainer.querySelectorAll('tbody tr');
                 const tbody = existingTable.querySelector('tbody');
+                const newRows = tempContainer.querySelectorAll('tbody tr');
                 newRows.forEach(row => tbody.appendChild(row));
-            }
+            };
         };
 
-        this.updateLoadingState(); // Updates the UI state
+        // this.updateLoadingState(); // Updates the UI state
     }
 
     // Updates the loading indicator and record count
@@ -285,19 +307,27 @@ class StreamingRecordsManager {
 
         const loadingElement = this.newTab.document.getElementById('loading'); // Finds the loading element
         if (loadingElement) {
-            let message = this.isLoading ? 'Loading more records...' : '';
-            if (!this.hasMore) {
-                message = `All ${this.recordsReceived} records loaded`;
-            } else if (!this.isLoading) {
-                message = 'Scroll for more';
+            // let message = this.isLoading ? 'Loading more records...' : '';
+            // if (!this.hasMore) {
+            //     message = `All ${this.recordsReceived} records loaded`;
+            // } else if (!this.isLoading) {
+            //     message = 'Scroll for more';
+            // }
+            if (loadingElement) {
+                if (this.isLoading) {
+                    loadingElement.textContent='Loading more records...'
+                } else if (!this.hasMore){
+                    loadingElement.textContent = `All ${this.allRecords.size} records loaded`;
+                } else{
+                    loadingElement.textContent = 'Scroll for more';
+                }
             }
-            loadingElement.textContent = message;
-        }
 
-        const countElement = this.newTab.document.getElementById('records-count'); // Finds the record count element
-        if (countElement) {
-            const totalText = this.totalRecords ? `/${this.totalRecords}`:'';
-            countElement.textContent = `Records: ${this.recordsReceived} ${totalText}`; // Updates the record count
+            const countElement = this.newTab.document.getElementById('records-count');
+            if (countElement) {
+                const totalText = this.totalRecords ? `/${this.totalRecords}`:'';
+                countElement.textContent = `Records: ${this.allRecords.size} ${totalText}`;
+            };
         }
     };
 
