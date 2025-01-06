@@ -38,7 +38,7 @@ class StreamingRecordsManager {
         this.handleScroll = this.debounce(this.checkScrollPosition.bind(this), 150); // Debounced scroll handler
         this.cleanup = this.cleanup.bind(this); // Ensures proper cleanup of resources
         this.totalRecords = null;
-        // this.recordsReceived = 0;
+        this.lastRecordCount = 0;// to track last record count to detect when no new records are to be added
         
         this.init(); // Initialize the streaming process
     }
@@ -200,6 +200,8 @@ class StreamingRecordsManager {
             };
 
             let newRecordsCount = 0;
+            const initialSize = this.allRecords.size;
+
             const reader = response.body
                 .pipeThrough(new TextDecoderStream()) // Decodes the response stream
                 .getReader(); // Reads the decoded stream
@@ -228,27 +230,38 @@ class StreamingRecordsManager {
                         newRecordsCount++;
                     };
                 });
-                console.log(`Current records count: ${this.allRecords.size} out of ${this.totalRecords}`);
-                
-                //Update hasMore based on total records if available
-                if (this.totalRecords !== null) {
-                    this.hasMore = this.allRecords.size < this.totalRecords;
-                }; 
-            // Only render if we have new records
-                if (newRecordsCount > 0) {
-                    this.renderRecords(true);
+                // Only render if we have new records
+                    if (newRecordsCount > 0) {
+                        this.renderRecords(true);
+                    };
+
+                console.log(`Current records count: ${this.allRecords.size} out of ${this.totalRecords}`);//Code Testing
+            };
+
+            // check if we received any new records
+            const recordsAdded =this.allRecords.size - initialSize;
+            //stop any further request, if we didn't get any new records or total record amount is done
+            if (recordsAdded === 0 || (this.totalRecords !== null && this.allRecords.size >= this.totalRecords)) {
+                this.hasMore = false;
+
+                // not calling cleanup(), just aborting the SSE request system and UI update
+                if ( this.abortController) {
+                    this.abortController.abort();
                 };
 
-                // recordCount += records.length; // Updates the record count
-                // this.recordsReceived += records.length;
-                // this.allRecords.push(...records); // Adds new records to the main array
-                // this.renderRecords(true); // Renders the new records
-            };
-            
-            this.currentOffset = this.allRecords.size; // Updates the offset for the next batch
+                //Update the loading message to indicate completion
+                if (this.newTab && !this.newTab.closed) {
+                    const loadingElement = this.newTab.document.getElementById('loading');
+                    if (loadingElement) {
+                        loadingElement.textContent = `All ${this.allRecords.size} records loaded`;
+                    }
+                };
 
 
-            } catch (error) {
+            }else{
+                this.currentOffset = this.allRecords.size;
+            }
+        }catch (error) {
                 if (error.name === 'AbortError') return;
                 this.handleError(error);
             }finally{
@@ -307,12 +320,6 @@ class StreamingRecordsManager {
 
         const loadingElement = this.newTab.document.getElementById('loading'); // Finds the loading element
         if (loadingElement) {
-            // let message = this.isLoading ? 'Loading more records...' : '';
-            // if (!this.hasMore) {
-            //     message = `All ${this.recordsReceived} records loaded`;
-            // } else if (!this.isLoading) {
-            //     message = 'Scroll for more';
-            // }
             if (loadingElement) {
                 if (this.isLoading) {
                     loadingElement.textContent='Loading more records...'
@@ -325,7 +332,7 @@ class StreamingRecordsManager {
 
             const countElement = this.newTab.document.getElementById('records-count');
             if (countElement) {
-                const totalText = this.totalRecords ? `/${this.totalRecords}`:'';
+                const totalText = this.totalRecords ? `out of ${this.totalRecords}`:'';
                 countElement.textContent = `Records: ${this.allRecords.size} ${totalText}`;
             };
         }
