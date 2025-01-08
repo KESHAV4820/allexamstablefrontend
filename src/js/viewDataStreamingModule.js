@@ -30,6 +30,7 @@ class StreamingRecordsManager {
         this.batchSize = VIEWRECORDSBYSTREAMING_BATCHSIZE;//50; // Number of records to fetch per batch
         this.abortController = null; // Controller to cancel ongoing requests
         this.allRecords = new Set();//[]; // Stores all unique fetched records
+        this.processedIds = new Set(); // Add tracking for processed records
         this.newTab = null; // Reference to the new browser tab for the stream
         // this.recordBuffer = []; // Temporary buffer for records
         
@@ -39,6 +40,8 @@ class StreamingRecordsManager {
         this.cleanup = this.cleanup.bind(this); // Ensures proper cleanup of resources
         this.totalRecords = null;
         this.lastRecordCount = 0;// to track last record count to detect when no new records are to be added
+        this.lastRenderedIndex = 0;// to track the lsat rendered record index
+        this.pendingRecords = [];// this is buffer for records waiting to be rendered
         
         this.init(); // Initialize the streaming process
     }
@@ -161,6 +164,11 @@ class StreamingRecordsManager {
         }
     }
 
+    //Simple record ID generator using REGID and ROLL
+    getRecordId(record) {
+        return `${record.REGID}|${record.ROLL}`;
+    };
+
     // Loads more records from the server in batches
     async loadMoreRecords() {
         if (this.isLoading || !this.hasMore) return; // Prevents redundant calls
@@ -224,8 +232,11 @@ class StreamingRecordsManager {
                     .filter(Boolean); // Removes null values
 
                 // Add new records to Set to prevent duplicates
+                let newRecordsCount = 0;
                 records.forEach(record => {
-                    if (!this.recordExists(record)) {
+                    const recordId = this.getRecordId(record);
+                    if (!this.processedIds.has(recordId)) {
+                        this.processedIds.add(recordId);
                         this.allRecords.add(record);
                         newRecordsCount++;
                     };
@@ -235,11 +246,11 @@ class StreamingRecordsManager {
                         this.renderRecords(true);
                     };
 
+                };
+                
+                // check if we received any new records
+                const recordsAdded =this.allRecords.size - initialSize;
                 console.log(`Current records count: ${this.allRecords.size} out of ${this.totalRecords}`);//Code Testing
-            };
-
-            // check if we received any new records
-            const recordsAdded =this.allRecords.size - initialSize;
             //stop any further request, if we didn't get any new records or total record amount is done
             if (recordsAdded === 0 || (this.totalRecords !== null && this.allRecords.size >= this.totalRecords)) {
                 this.hasMore = false;
@@ -250,12 +261,12 @@ class StreamingRecordsManager {
                 };
 
                 //Update the loading message to indicate completion
-                if (this.newTab && !this.newTab.closed) {
+                // if (this.newTab && !this.newTab.closed) {
                     const loadingElement = this.newTab.document.getElementById('loading');
                     if (loadingElement) {
                         loadingElement.textContent = `All ${this.allRecords.size} records loaded`;
                     }
-                };
+                // };
 
 
             }else{
@@ -274,9 +285,8 @@ class StreamingRecordsManager {
 
     recordExists(newRecord){
         //checking if record already exists based on unique identifier (e.g., REGID or ROLL or combination of two)
-        return Array.from(this.allRecords).some(existingRecord => existingRecord.REGID === newRecord.REGID && 
-            existingRecord.ROLL === newRecord.ROLL
-        );
+        // return Array.from(this.allRecords).some(existingRecord => existingRecord.REGID === newRecord.REGID && existingRecord.ROLL === newRecord.ROLL);//forced stop
+        return this.processedIds.has(this.getRecordId(newRecord));// newly added
     };
     // Renders records in the streaming tab
     renderRecords(append = false) {
@@ -289,13 +299,23 @@ class StreamingRecordsManager {
 
         const recordsArray = Array.from(this.allRecords);
         console.log('Records to render:', recordsArray);//Code Testing
+        console.log('Total records available:', recordsArray.length, 'Last rendered:', this.lastRenderedIndex);
         
 
         if (!append) {
             container.innerHTML = generateFormattedHTML(recordsArray); // Replaces content
+            this.lastRenderedIndex = recordsArray.length;
         } else {
-            const batchStart = Math.max(0, recordsArray.length - this.batchSize);
-            const newRecords = recordsArray.slice(batchStart);
+            // const batchStart = Math.max(0, recordsArray.length - this.batchSize);// this was the source of Bug for missing records. now resolved.
+
+            // Only render new records starting from lastRenderedIndex 
+            const newRecords = recordsArray.slice(this.lastRenderedIndex);
+
+            if (newRecords.length === 0) {
+                return;
+            };
+            console.log('Rendering new records from index:', this.lastRenderedIndex, 'Count:', newRecords.length);
+            
             const tempContainer = this.newTab.document.createElement('div');
             tempContainer.innerHTML = generateFormattedHTML(newRecords);
             
@@ -309,9 +329,9 @@ class StreamingRecordsManager {
                 const newRows = tempContainer.querySelectorAll('tbody tr');
                 newRows.forEach(row => tbody.appendChild(row));
             };
+            // Updating the last rendered index
+            this.lastRenderedIndex = recordsArray.length;
         };
-
-        // this.updateLoadingState(); // Updates the UI state
     }
 
     // Updates the loading indicator and record count

@@ -7,7 +7,7 @@ export const VIEWRECORDS_API_LIMIT=25000;//35000;
 export const VIEWRECORDS_API_OFFSET=0;
 
 export const VIEWRECORDSBYSTREAMING_API_URL=`http://127.0.0.1:3000/api/v1/records-stream`;
-export const VIEWRECORDSBYSTREAMING_BATCHSIZE=50;
+export const VIEWRECORDSBYSTREAMING_BATCHSIZE=100;
 
 export const DOWNLOADRECORDS_API_URL=`http://127.0.0.1:3000/api/v1/downloadrecords`;
 
