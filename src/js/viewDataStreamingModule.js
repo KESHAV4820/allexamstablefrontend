@@ -147,7 +147,214 @@ class StreamingRecordsManager {
         this.setupInitialHTML(); // Sets up the initial HTML structure in the tab
         this.newTab.addEventListener('scroll', this.handleScroll); // Adds a scroll event listener
         window.addEventListener('unload', this.cleanup); // Ensures cleanup when the window is unloaded
-        this.loadMoreRecords(); // Starts loading records immediately
+
+        // this.loadMoreRecords(); // Starts loading records immediately// Issue Found it loads all the data, keeps sending SSE request on it's own without waiting for the user to scroll to the position from where the request should be sent.
+        // this.renderRecords();
+
+        //first time initial load
+        this.initialLoad();
+    };
+
+    async initialLoad(){
+        if (!this.isLoading) {
+            this.isLoading = true;
+            await this.fetchBatch();
+            this.isLoading = false;
+        }
+    };
+
+/*    async fetchBatch(){
+        try {
+            if (this.abortController) {
+                this.abortController.abort();
+            }
+            this.abortController = new AbortController();
+    
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Client-Id': crypto.randomUUID()
+                },
+                body: JSON.stringify({
+                    filters: this.filterParams,
+                    offset: this.currentOffset,
+                    limit: this.batchSize
+                }),
+                signal: this.abortController.signal
+            });
+    
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+            if (this.totalRecords === null) {
+                const totalCount = response.headers.get('X-Total-Count');
+                if (totalCount) {
+                    this.totalRecords = parseInt(totalCount, 10);
+                }
+            };
+    
+            let newRecordsCount = 0;
+            const initialSize = this.allRecords.size;
+            
+            const reader = response.body
+                .pipeThrough(new TextDecoderStream())
+                .getReader();
+    
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+    
+                const records = value.split('\n\n')
+                    .filter(event => event.startsWith('data: '))
+                    .map(event => {
+                        try {
+                            return JSON.parse(event.replace('data: ', ''));
+                        } catch (error) {
+                            console.error('Parse error:', error);
+                            return null;
+                        }
+                    })
+                    .filter(Boolean);
+    
+                records.forEach(record => {
+                    const recordId = this.getRecordId(record);
+                    if (!this.processedIds.has(recordId)) {
+                        this.processedIds.add(recordId);
+                        this.allRecords.add(record);
+                        newRecordsCount++;
+                    }
+                });
+    
+                if (newRecordsCount > 0) {
+                    this.renderRecords(true);
+                }
+            }
+    
+            const recordsAdded = this.allRecords.size - initialSize;
+            if (recordsAdded === 0 || (this.totalRecords !== null && this.allRecords.size >= this.totalRecords)) {
+                this.hasMore = false;
+                const loadingElement = this.newTab.document.getElementById('loading');
+                if (loadingElement) {
+                    loadingElement.textContent = `All ${this.allRecords.size} records loaded`;
+                }
+            } else {
+                this.currentOffset = this.allRecords.size;
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                return;
+            };
+            this.handleError(error);
+        }finally{
+            this.updateLoadingState();
+        }
+    };
+*/
+    async fetchBatch() {
+        try {
+            if (this.abortController) {
+                this.abortController.abort();
+            }
+            this.abortController = new AbortController();
+
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Client-Id': crypto.randomUUID()
+                },
+                body: JSON.stringify({
+                    filters: this.filterParams,
+                    offset: this.currentOffset,
+                    limit: this.batchSize
+                }),
+                signal: this.abortController.signal
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            if (this.totalRecords === null) {
+                const totalCount = response.headers.get('X-Total-Count');
+                if (totalCount) {
+                    this.totalRecords = parseInt(totalCount, 10);
+                }
+            }
+
+            const reader = response.body
+                .pipeThrough(new TextDecoderStream())
+                .getReader();
+
+            let recordsInBatch = 0;
+            let batchComplete = false;
+
+            while (!batchComplete) {
+                const { done, value } = await reader.read();
+                
+                if (done) {
+                    batchComplete = true;
+                    break;
+                }
+
+                const records = value.split('\n\n')
+                    .filter(event => event.startsWith('data: '))
+                    .map(event => {
+                        try {
+                            return JSON.parse(event.replace('data: ', ''));
+                        } catch (error) {
+                            return null;
+                        }
+                    })
+                    .filter(Boolean);
+
+                for (const record of records) {
+                    const recordId = this.getRecordId(record);
+                    if (!this.processedIds.has(recordId)) {
+                        this.processedIds.add(recordId);
+                        this.allRecords.add(record);
+                        recordsInBatch++;
+                    }
+
+                    // Force batch completion after reaching batchSize
+                    if (recordsInBatch >= this.batchSize) {
+                        batchComplete = true;
+                        // Cancel the ongoing stream
+                        reader.cancel();
+                        break;
+                    }
+                }
+
+                if (recordsInBatch > 0) {
+                    this.renderRecords(true);
+                }
+            }
+
+            if (recordsInBatch === 0 || (this.totalRecords !== null && this.allRecords.size >= this.totalRecords)) {
+                this.hasMore = false;
+                const loadingElement = this.newTab.document.getElementById('loading');
+                if (loadingElement) {
+                    loadingElement.textContent = `All ${this.allRecords.size} records loaded`;
+                }
+            } else {
+                this.currentOffset = this.allRecords.size;
+            }
+
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            this.handleError(error);
+        } finally {
+            this.isLoading = false;
+            this.updateLoadingState();
+        }
+    };// newly added    
+
+    loadMoreRecords(){
+        if (this.isLoading || !this.hasMore) {
+            return;
+        };
+        this.isLoading = true;
+        this.fetchBatch().finally(() => {	
+            this.isLoading = false;
+        	});
     };
 
     // Checks the scroll position and loads more records if near the bottom
@@ -159,7 +366,7 @@ class StreamingRecordsManager {
         const documentHeight = this.newTab.document.documentElement.scrollHeight; // Total document height
         
         // Loads more records if the user scrolls near the bottom
-        if (documentHeight - (scrollPosition + windowHeight) < this.scrollThreshold) {
+        if (documentHeight - (scrollPosition + windowHeight) < this.scrollThreshold && !this.isLoading && this.hasMore) {
             this.loadMoreRecords();
         }
     }
