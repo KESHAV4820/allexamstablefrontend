@@ -36,7 +36,11 @@ class StreamingRecordsManager {
         
         // Scroll behavior settings
         this.scrollThreshold = 200; // Pixels from the bottom to trigger loading
-        this.handleScroll = this.debounce(this.checkScrollPosition.bind(this), 150); // Debounced scroll handler
+
+        this.isScrollLocked = false;
+        this.scrollTimeout = null;
+        // this.handleScroll = this.debounce(this.checkScrollPosition.bind(this), 150); // Debounced scroll handler
+        this.handleScroll= this.handleScrollEvent.bind(this);
         this.cleanup = this.cleanup.bind(this); // Ensures proper cleanup of resources
         this.totalRecords = null;
         this.lastRecordCount = 0;// to track last record count to detect when no new records are to be added
@@ -148,7 +152,7 @@ class StreamingRecordsManager {
         this.newTab.addEventListener('scroll', this.handleScroll); // Adds a scroll event listener
         window.addEventListener('unload', this.cleanup); // Ensures cleanup when the window is unloaded
 
-        // this.loadMoreRecords(); // Starts loading records immediately// Issue Found it loads all the data, keeps sending SSE request on it's own without waiting for the user to scroll to the position from where the request should be sent.
+        this.loadMoreRecords(); 
         // this.renderRecords();
 
         //first time initial load
@@ -314,17 +318,15 @@ class StreamingRecordsManager {
                         recordsInBatch++;
                     }
 
-                    // Force batch completion after reaching batchSize
                     if (recordsInBatch >= this.batchSize) {
                         batchComplete = true;
-                        // Cancel the ongoing stream
                         reader.cancel();
                         break;
                     }
                 }
 
                 if (recordsInBatch > 0) {
-                    this.renderRecords(true);
+                    await this.renderRecords(true);
                 }
             }
 
@@ -341,24 +343,36 @@ class StreamingRecordsManager {
         } catch (error) {
             if (error.name === 'AbortError') return;
             this.handleError(error);
-        } finally {
-            this.isLoading = false;
-            this.updateLoadingState();
-        }
+        } 
+        // finally {
+        //     this.isLoading = false;
+        //     this.updateLoadingState();
+        // }
     };// newly added    
 
-    loadMoreRecords(){
+    async loadMoreRecords(){
         if (this.isLoading || !this.hasMore) {
             return;
         };
         this.isLoading = true;
-        this.fetchBatch().finally(() => {	
+        // this.fetchBatch().finally(() => {	
+        //     this.isLoading = false;
+        // 	});
+        try {
+            await this.fetchBatch();
+        } finally {
             this.isLoading = false;
-        	});
+            this.updateLoadingState();
+            
+            // Unlock scroll after a short delay to prevent immediate retriggering
+            setTimeout(() => {
+                this.unlockScroll();
+            }, 250);
+        };
     };
 
     // Checks the scroll position and loads more records if near the bottom
-    checkScrollPosition() {
+/*    checkScrollPosition() {
         if (!this.newTab || this.newTab.closed) return; // Ensures the tab is valid
         
         const scrollPosition = this.newTab.scrollY; // Current scroll position
@@ -369,7 +383,40 @@ class StreamingRecordsManager {
         if (documentHeight - (scrollPosition + windowHeight) < this.scrollThreshold && !this.isLoading && this.hasMore) {
             this.loadMoreRecords();
         }
-    }
+    };
+*/
+    // handleScrollEvent - New method to replace the old checkScrollPosition
+    handleScrollEvent() {
+        if (this.isScrollLocked || this.isLoading || !this.hasMore || !this.newTab || this.newTab.closed) {
+            return;
+        }
+
+        const scrollPosition = this.newTab.scrollY;
+        const windowHeight = this.newTab.innerHeight;
+        const documentHeight = this.newTab.document.documentElement.scrollHeight;
+        
+        if (documentHeight - (scrollPosition + windowHeight) < this.scrollThreshold) {
+            this.lockScroll();
+            this.loadMoreRecords();
+        }
+    };
+    // New method to lock scroll
+    lockScroll() {
+        this.isScrollLocked = true;
+        const container = this.newTab.document.querySelector('.container');
+        if (container) {
+            // Shift the scroll position up by threshold + 100px buffer
+            this.newTab.scrollTo({
+                top: this.newTab.scrollY - (this.scrollThreshold + 450),
+                behavior: 'smooth'
+            });
+        }
+    };
+    // New method to unlock scroll
+    unlockScroll() {
+        this.isScrollLocked = false;
+    };
+
 
     //Simple record ID generator using REGID and ROLL
     getRecordId(record) {
@@ -377,7 +424,7 @@ class StreamingRecordsManager {
     };
 
     // Loads more records from the server in batches
-    async loadMoreRecords() {
+/*    async loadMoreRecords() {
         if (this.isLoading || !this.hasMore) return; // Prevents redundant calls
         this.isLoading = true;
 
@@ -489,6 +536,24 @@ class StreamingRecordsManager {
             };
 
         };
+*/
+    // Modified loadMoreRecords method
+    async loadMoreRecords() {
+        if (this.isLoading || !this.hasMore) return;
+        this.isLoading = true;
+        
+        try {
+            await this.fetchBatch();
+        } finally {
+            this.isLoading = false;
+            this.updateLoadingState();
+            
+            // Unlock scroll after a short delay to prevent immediate retriggering
+            setTimeout(() => {
+                this.unlockScroll();
+            }, 250);
+        }
+    };
 
     recordExists(newRecord){
         //checking if record already exists based on unique identifier (e.g., REGID or ROLL or combination of two)
@@ -499,47 +564,41 @@ class StreamingRecordsManager {
     renderRecords(append = false) {
         if (!this.newTab || this.newTab.closed) return;
 
-        const container = this.newTab.document.querySelector('.container'); // Finds the container
+        const container = this.newTab.document.querySelector('.container');
         if (!container) return;
 
-        // console.log('Records to render:', this.allRecords);// Code Testing
-
         const recordsArray = Array.from(this.allRecords);
-        console.log('Records to render:', recordsArray);//Code Testing
-        console.log('Total records available:', recordsArray.length, 'Last rendered:', this.lastRenderedIndex);
-        
 
         if (!append) {
-            container.innerHTML = generateFormattedHTML(recordsArray); // Replaces content
+            container.innerHTML = generateFormattedHTML(recordsArray);
             this.lastRenderedIndex = recordsArray.length;
         } else {
-            // const batchStart = Math.max(0, recordsArray.length - this.batchSize);// this was the source of Bug for missing records. now resolved.
-
-            // Only render new records starting from lastRenderedIndex 
             const newRecords = recordsArray.slice(this.lastRenderedIndex);
 
-            if (newRecords.length === 0) {
-                return;
-            };
-            console.log('Rendering new records from index:', this.lastRenderedIndex, 'Count:', newRecords.length);
-            
+            if (newRecords.length === 0) return;
+
             const tempContainer = this.newTab.document.createElement('div');
             tempContainer.innerHTML = generateFormattedHTML(newRecords);
             
-            // Find the existing table or create a new one
             let existingTable = container.querySelector('table');
             if (!existingTable) {
                 container.appendChild(tempContainer.firstElementChild);
             } else {
-                // Append only the new rows to the existing table
                 const tbody = existingTable.querySelector('tbody');
                 const newRows = tempContainer.querySelectorAll('tbody tr');
                 newRows.forEach(row => tbody.appendChild(row));
             };
-            // Updating the last rendered index
+            
             this.lastRenderedIndex = recordsArray.length;
         };
-    }
+
+        // Update the records count
+        const countElement = this.newTab.document.getElementById('records-count');
+        if (countElement) {
+            const totalText = this.totalRecords ? ` out of ${this.totalRecords}` : '';
+            countElement.textContent = `Records: ${this.allRecords.size}${totalText}`;
+        };  
+    };
 
     // Updates the loading indicator and record count
     updateLoadingState() {
