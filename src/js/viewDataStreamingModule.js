@@ -1,9 +1,12 @@
+    // ================================================================================
+    // IMPORTS AND CONSTANTS
+    // ================================================================================
+
 import { VIEWRECORDSBYSTREAMING_API_URL, VIEWRECORDSBYSTREAMING_BATCHSIZE } from "./config.js";
 import { generateFormattedHTML } from "./dataViewingHtmlFormatter.js";
 
-// viewDataStreamingModule.js
 
-// Constants
+// Array of fields that exist in the data base as columns
 const RECORD_FIELDS = [
     // Fields defining the structure of a record
     'EXAMNAME', 'REGID', 'ROLL', 'NAME', 'FATHERNAME', 'MOTHERNAME', 
@@ -15,42 +18,54 @@ const RECORD_FIELDS = [
     'ALLOC_STAT', 'ALLOC_AREA', 'ALLOC_CAT', 'RANK', 'WITHHELD'
 ];
 
-// Class to manage streaming records from a server
+    // ================================================================================
+    // STREAMING RECORDS MANAGER CLASS
+    // Main class that handles fetching, displaying, and managing streamed records
+    // Uses Server-Sent Events (SSE) for real-time data streaming
+    // ================================================================================
 class StreamingRecordsManager {
     constructor(filterParams, fields = RECORD_FIELDS) {
-        // Configuration of API URL and default fields for the records
-        this.apiUrl =VIEWRECORDSBYSTREAMING_API_URL;
+        // API Configuration
+        this.apiUrl = VIEWRECORDSBYSTREAMING_API_URL;
         this.filterParams = filterParams;
         this.fields = fields;
         
-        // Initial state variables
-        this.isLoading = false; // Tracks if records are being fetched
-        this.hasMore = true; // Indicates if there are more records to load
-        this.currentOffset = 0; // Tracks the offset for fetching records
-        this.batchSize = VIEWRECORDSBYSTREAMING_BATCHSIZE;//50; // Number of records to fetch per batch
-        this.abortController = null; // Controller to cancel ongoing requests
-        this.allRecords = new Set();//[]; // Stores all unique fetched records
-        this.processedIds = new Set(); // Add tracking for processed records
-        this.newTab = null; // Reference to the new browser tab for the stream
-        // this.recordBuffer = []; // Temporary buffer for records
+        // State Management
+        this.isLoading = false;      // Prevents multiple simultaneous fetches
+        this.hasMore = true;         // Indicates if more records are available
+        this.currentOffset = 0;      // Tracks current position in record set
+        this.batchSize = VIEWRECORDSBYSTREAMING_BATCHSIZE; // Records per fetch
+        this.abortController = null; // Controls ongoing fetch requests
         
-        // Scroll behavior settings
-        this.scrollThreshold = 200; // Pixels from the bottom to trigger loading
-
-        this.isScrollLocked = false;
-        this.scrollTimeout = null;
-        // this.handleScroll = this.debounce(this.checkScrollPosition.bind(this), 150); // Debounced scroll handler
-        this.handleScroll= this.handleScrollEvent.bind(this);
-        this.cleanup = this.cleanup.bind(this); // Ensures proper cleanup of resources
-        this.totalRecords = null;
-        this.lastRecordCount = 0;// to track last record count to detect when no new records are to be added
-        this.lastRenderedIndex = 0;// to track the lsat rendered record index
-        this.pendingRecords = [];// this is buffer for records waiting to be rendered
+        // Data Storage
+        this.allRecords = new Set();     // Stores unique records
+        this.processedIds = new Set();    // Tracks processed record IDs
+        this.totalRecords = null;         // Total available records
+        this.lastRecordCount = 0;         // Previous record count
+        this.lastRenderedIndex = 0;       // Last rendered record index
+        this.pendingRecords = [];         // Buffer for unrendered records
         
-        this.init(); // Initialize the streaming process
+        // UI Elements
+        this.newTab = null;               // Reference to display window
+        
+        // Scroll Management
+        this.scrollThreshold = 200;       // Distance from bottom to trigger load
+        this.isScrollLocked = false;      // Prevents multiple scroll triggers
+        this.scrollTimeout = null;        // Timer for scroll event handling
+        this.handleScroll = this.handleScrollEvent.bind(this);
+        
+        // Cleanup
+        this.cleanup = this.cleanup.bind(this);
+        
+        // Start the process
+        this.init();
     }
 
-    // Sets up the basic HTML for the streaming tab
+    // ================================================================================
+    // UI SETUP AND INITIALIZATION
+    // ================================================================================
+    
+    // Sets up the initial HTML structure and styling in the new tab after view button is pressed
     setupInitialHTML() {
         const css = `
             body { 
@@ -144,21 +159,6 @@ class StreamingRecordsManager {
         this.newTab.document.write(html);
         this.newTab.document.close();
     };
-
-    // Initialization logic, opens a new tab and sets up event listeners
-    init() {
-        this.newTab = window.open('', '_blank'); // Opens a new blank tab
-        this.setupInitialHTML(); // Sets up the initial HTML structure in the tab
-        this.newTab.addEventListener('scroll', this.handleScroll); // Adds a scroll event listener
-        window.addEventListener('unload', this.cleanup); // Ensures cleanup when the window is unloaded
-
-        this.loadMoreRecords(); 
-        // this.renderRecords();
-
-        //first time initial load
-        this.initialLoad();
-    };
-
     async initialLoad(){
         if (!this.isLoading) {
             this.isLoading = true;
@@ -167,100 +167,73 @@ class StreamingRecordsManager {
         }
     };
 
-/*    async fetchBatch(){
-        try {
-            if (this.abortController) {
-                this.abortController.abort();
-            }
-            this.abortController = new AbortController();
+    // Initialization logic, opens a new tab and sets up event listeners
+    init() {
+        this.newTab = window.open('', '_blank');
+        this.setupInitialHTML();
+        
+        // Set up event listeners
+        this.newTab.addEventListener('scroll', this.handleScroll);
+        window.addEventListener('unload', this.cleanup);
+        
+        // Start loading data
+        this.loadMoreRecords();
+        this.initialLoad();
+    };
+
+    // ================================================================================
+    // SCROLL MANAGEMENT
+    // Handles infinite scrolling functionality with anti-cascade protection
+    // ================================================================================
     
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Client-Id': crypto.randomUUID()
-                },
-                body: JSON.stringify({
-                    filters: this.filterParams,
-                    offset: this.currentOffset,
-                    limit: this.batchSize
-                }),
-                signal: this.abortController.signal
-            });
-    
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    
-            if (this.totalRecords === null) {
-                const totalCount = response.headers.get('X-Total-Count');
-                if (totalCount) {
-                    this.totalRecords = parseInt(totalCount, 10);
-                }
-            };
-    
-            let newRecordsCount = 0;
-            const initialSize = this.allRecords.size;
-            
-            const reader = response.body
-                .pipeThrough(new TextDecoderStream())
-                .getReader();
-    
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-    
-                const records = value.split('\n\n')
-                    .filter(event => event.startsWith('data: '))
-                    .map(event => {
-                        try {
-                            return JSON.parse(event.replace('data: ', ''));
-                        } catch (error) {
-                            console.error('Parse error:', error);
-                            return null;
-                        }
-                    })
-                    .filter(Boolean);
-    
-                records.forEach(record => {
-                    const recordId = this.getRecordId(record);
-                    if (!this.processedIds.has(recordId)) {
-                        this.processedIds.add(recordId);
-                        this.allRecords.add(record);
-                        newRecordsCount++;
-                    }
-                });
-    
-                if (newRecordsCount > 0) {
-                    this.renderRecords(true);
-                }
-            }
-    
-            const recordsAdded = this.allRecords.size - initialSize;
-            if (recordsAdded === 0 || (this.totalRecords !== null && this.allRecords.size >= this.totalRecords)) {
-                this.hasMore = false;
-                const loadingElement = this.newTab.document.getElementById('loading');
-                if (loadingElement) {
-                    loadingElement.textContent = `All ${this.allRecords.size} records loaded`;
-                }
-            } else {
-                this.currentOffset = this.allRecords.size;
-            }
-        } catch (error) {
-            if (error.name === 'AbortError') {
-                return;
-            };
-            this.handleError(error);
-        }finally{
-            this.updateLoadingState();
+    // Main scroll event handler - prevents cascade triggers
+    handleScrollEvent() {
+        // Skip if already loading or locked
+        if (this.isScrollLocked || this.isLoading || !this.hasMore || !this.newTab || this.newTab.closed) {
+            return;
+        }
+
+        // Check if we're near the bottom
+        const scrollPosition = this.newTab.scrollY;
+        const windowHeight = this.newTab.innerHeight;
+        const documentHeight = this.newTab.document.documentElement.scrollHeight;
+        
+        if (documentHeight - (scrollPosition + windowHeight) < this.scrollThreshold) {
+            this.lockScroll();           // Lock scroll to prevent cascade
+            this.loadMoreRecords();      // Load more data
         }
     };
-*/
+    // Prevents scroll triggers by locking and moving viewport
+    lockScroll() {
+        this.isScrollLocked = true;
+        const container = this.newTab.document.querySelector('.container');
+        if (container) {
+            // Move viewport away from trigger zone
+            this.newTab.scrollTo({
+                top: this.newTab.scrollY - (this.scrollThreshold + 450),
+                behavior: 'smooth'
+            });
+        }
+    };
+    // Re-enables scroll triggers
+    unlockScroll() {
+        this.isScrollLocked = false;
+    };
+
+    // ================================================================================
+    // DATA FETCHING AND PROCESSING
+    // Handles SSE data streaming and record management
+    // ================================================================================
+    //To Fetch a batch of record by SSE(Server Side Event) method
     async fetchBatch() {
+        //to cancel any ongoing request before the current requests
         try {
             if (this.abortController) {
                 this.abortController.abort();
             }
             this.abortController = new AbortController();
-
+            
+            //Making the fetch request
             const response = await fetch(this.apiUrl, {
                 method: 'POST',
                 headers: {
@@ -283,14 +256,14 @@ class StreamingRecordsManager {
                     this.totalRecords = parseInt(totalCount, 10);
                 }
             }
-
+            //Process the SSE stream
             const reader = response.body
                 .pipeThrough(new TextDecoderStream())
                 .getReader();
 
             let recordsInBatch = 0;
             let batchComplete = false;
-
+            // Process incoming SSE data
             while (!batchComplete) {
                 const { done, value } = await reader.read();
                 
@@ -330,6 +303,7 @@ class StreamingRecordsManager {
                 }
             }
 
+            //Update state based on results
             if (recordsInBatch === 0 || (this.totalRecords !== null && this.allRecords.size >= this.totalRecords)) {
                 this.hasMore = false;
                 const loadingElement = this.newTab.document.getElementById('loading');
@@ -350,6 +324,7 @@ class StreamingRecordsManager {
         // }
     };// newly added    
 
+    // this is the main method that fetches more data if needed
     async loadMoreRecords(){
         if (this.isLoading || !this.hasMore) {
             return;
@@ -371,196 +346,29 @@ class StreamingRecordsManager {
         };
     };
 
-    // Checks the scroll position and loads more records if near the bottom
-/*    checkScrollPosition() {
-        if (!this.newTab || this.newTab.closed) return; // Ensures the tab is valid
-        
-        const scrollPosition = this.newTab.scrollY; // Current scroll position
-        const windowHeight = this.newTab.innerHeight; // Height of the viewport
-        const documentHeight = this.newTab.document.documentElement.scrollHeight; // Total document height
-        
-        // Loads more records if the user scrolls near the bottom
-        if (documentHeight - (scrollPosition + windowHeight) < this.scrollThreshold && !this.isLoading && this.hasMore) {
-            this.loadMoreRecords();
-        }
-    };
-*/
-    // handleScrollEvent - New method to replace the old checkScrollPosition
-    handleScrollEvent() {
-        if (this.isScrollLocked || this.isLoading || !this.hasMore || !this.newTab || this.newTab.closed) {
-            return;
-        }
-
-        const scrollPosition = this.newTab.scrollY;
-        const windowHeight = this.newTab.innerHeight;
-        const documentHeight = this.newTab.document.documentElement.scrollHeight;
-        
-        if (documentHeight - (scrollPosition + windowHeight) < this.scrollThreshold) {
-            this.lockScroll();
-            this.loadMoreRecords();
-        }
-    };
-    // New method to lock scroll
-    lockScroll() {
-        this.isScrollLocked = true;
-        const container = this.newTab.document.querySelector('.container');
-        if (container) {
-            // Shift the scroll position up by threshold + 100px buffer
-            this.newTab.scrollTo({
-                top: this.newTab.scrollY - (this.scrollThreshold + 450),
-                behavior: 'smooth'
-            });
-        }
-    };
-    // New method to unlock scroll
-    unlockScroll() {
-        this.isScrollLocked = false;
-    };
 
 
+
+    // ================================================================================
+    // RECORD PROOFING AND DE-DUPLICATION
+    // ================================================================================
     //Simple record ID generator using REGID and ROLL
     getRecordId(record) {
         return `${record.REGID}|${record.ROLL}`;
     };
-
-    // Loads more records from the server in batches
-/*    async loadMoreRecords() {
-        if (this.isLoading || !this.hasMore) return; // Prevents redundant calls
-        this.isLoading = true;
-
-        try {
-            if (this.abortController) {
-                this.abortController.abort(); // Cancels any ongoing fetch
-            };
-
-            this.abortController = new AbortController(); // Creates a new abort controller
-                
-            // Makes a POST request to fetch records with the filter parameters
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Client-Id': crypto.randomUUID() // Generates a unique client ID
-                },
-                body: JSON.stringify({
-                    filters: this.filterParams,
-                    offset: this.currentOffset,
-                    limit: this.batchSize
-                }),
-                signal: this.abortController.signal // Attaches the abort signal
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); // Handles errors
-
-            // Get total records count from header if available
-            if (this.totalRecords=== null) {
-                const totalCount = response.headers.get('X-Total-Count');
-                if (totalCount) {
-                    this.totalRecords=parseInt(totalCount, 10);
-                    console.log(`Total records to fetch: ${this.totalRecords}`);
-                };
-            };
-
-            let newRecordsCount = 0;
-            const initialSize = this.allRecords.size;
-
-            const reader = response.body
-                .pipeThrough(new TextDecoderStream()) // Decodes the response stream
-                .getReader(); // Reads the decoded stream
-
-            // Reads the streamed response and processes records
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break; // Stops when the stream ends
-                
-                const records = value.split('\n\n') // Splits response into events
-                    .filter(event => event.startsWith('data: ')) // Filters valid events
-                    .map(event => {
-                        try {
-                            return JSON.parse(event.replace('data: ', '')); // Parses JSON data
-                        } catch (error) {
-                            console.error('Parse error:', error); // Logs parse errors
-                            return null;
-                        }
-                    })
-                    .filter(Boolean); // Removes null values
-
-                // Add new records to Set to prevent duplicates
-                let newRecordsCount = 0;
-                records.forEach(record => {
-                    const recordId = this.getRecordId(record);
-                    if (!this.processedIds.has(recordId)) {
-                        this.processedIds.add(recordId);
-                        this.allRecords.add(record);
-                        newRecordsCount++;
-                    };
-                });
-                // Only render if we have new records
-                    if (newRecordsCount > 0) {
-                        this.renderRecords(true);
-                    };
-
-                };
-                
-                // check if we received any new records
-                const recordsAdded =this.allRecords.size - initialSize;
-                console.log(`Current records count: ${this.allRecords.size} out of ${this.totalRecords}`);//Code Testing
-            //stop any further request, if we didn't get any new records or total record amount is done
-            if (recordsAdded === 0 || (this.totalRecords !== null && this.allRecords.size >= this.totalRecords)) {
-                this.hasMore = false;
-
-                // not calling cleanup(), just aborting the SSE request system and UI update
-                if ( this.abortController) {
-                    this.abortController.abort();
-                };
-
-                //Update the loading message to indicate completion
-                // if (this.newTab && !this.newTab.closed) {
-                    const loadingElement = this.newTab.document.getElementById('loading');
-                    if (loadingElement) {
-                        loadingElement.textContent = `All ${this.allRecords.size} records loaded`;
-                    }
-                // };
-
-
-            }else{
-                this.currentOffset = this.allRecords.size;
-            }
-        }catch (error) {
-                if (error.name === 'AbortError') return;
-                this.handleError(error);
-            }finally{
-                this.isLoading = false;
-                this.abortController = null;
-                this.updateLoadingState();
-            };
-
-        };
-*/
-    // Modified loadMoreRecords method
-    async loadMoreRecords() {
-        if (this.isLoading || !this.hasMore) return;
-        this.isLoading = true;
-        
-        try {
-            await this.fetchBatch();
-        } finally {
-            this.isLoading = false;
-            this.updateLoadingState();
-            
-            // Unlock scroll after a short delay to prevent immediate retriggering
-            setTimeout(() => {
-                this.unlockScroll();
-            }, 250);
-        }
-    };
-
+    //To check if the records exists to avoid the duplicate
     recordExists(newRecord){
         //checking if record already exists based on unique identifier (e.g., REGID or ROLL or combination of two)
         // return Array.from(this.allRecords).some(existingRecord => existingRecord.REGID === newRecord.REGID && existingRecord.ROLL === newRecord.ROLL);//forced stop
         return this.processedIds.has(this.getRecordId(newRecord));// newly added
     };
-    // Renders records in the streaming tab
+
+    // ================================================================================
+    // RECORD RENDERING AND UI UPDATES
+    // Handles displaying records and updating UI state
+    // ================================================================================
+    
+    // Renders records to UI
     renderRecords(append = false) {
         if (!this.newTab || this.newTab.closed) return;
 
@@ -624,6 +432,10 @@ class StreamingRecordsManager {
         }
     };
 
+    // ================================================================================
+    // ERROR HANDLING AND CLEANUP
+    // Manages error states and resource cleanup
+    // ================================================================================
     // Handles errors during streaming
     handleError(error) {
         if (!this.newTab || this.newTab.closed) return;
@@ -636,16 +448,6 @@ class StreamingRecordsManager {
             </div>
         `;
     };
-
-    // Debounces a function to limit how often it runs
-    debounce(func, wait) {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout); // Clears any existing timeout
-            timeout = setTimeout(() => func.apply(this, args), wait); // Sets a new timeout
-        };
-    };
-
     // Cleans up resources and closes the streaming tab
     cleanup() {
         if (this.abortController) {
@@ -659,8 +461,12 @@ class StreamingRecordsManager {
 
         window.removeEventListener('unload', this.cleanup); // Removes the unload listener
     };
-}
 
+
+}
+// ================================================================================
+// EXPORTS
+// ================================================================================
 // Exported function to create a new streaming view instance
 export function createStreamingView(filterParams) {
     return new StreamingRecordsManager(filterParams, RECORD_FIELDS);
