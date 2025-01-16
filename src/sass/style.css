@@ -209,6 +209,40 @@
         /* margin-left: 2.3625rem; */
         width: 6.3125rem;
     }
+    .btn__7{/*Database Update*/
+        grid-area: 15/1/16/2;
+    }
+    /*ConceptNote: button with class= btn btn__7 also has the id=databaseUpdatePoint and reason why i am using id to style it, becouse the general styling based on .btn class is over-riding any styling changes that i am doing to btn__7. That's why i deed it. */
+    #databaseUpdatePoint {
+      /* display: inline-block; */
+      display: inline;
+      padding: 0.7575rem 1.515rem;
+      margin-top: 0.6rem;
+      font-size: 1.01rem;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      background-color: #ff5100c5;
+      color: #fff;
+      border: none;
+      border-radius: 0.2525rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      /* min-width: auto; Set min-width to auto to prevent stretching */
+      /* width: 6.3125rem; */
+
+      box-shadow: 0.505rem 0.505rem 0.631rem rgba(0, 0, 0, 0.589);
+    }
+    
+    #databaseUpdatePoint:hover {
+        background-color: #f50606;
+    }
+    
+    #databaseUpdatePoint:focus {
+        outline: none;
+        box-shadow: 0 0 0 0.189rem rgba(248, 72, 3, 0.747);
+    }
+
     .btn__3{/*DOWNLOAD*/
         grid-area: 1/9/2/10;
         width: 9.3125rem;
@@ -217,11 +251,11 @@
       grid-area: 1/7/2/8;
       width: 5.3125rem;
     }
-    .btn__5{
+    .btn__5{/*In Number*/
       grid-area: 1/4/2/5;
       margin: 1rem;
     }
-    .btn__6{
+    .btn__6{/*In Percentage*/
       grid-area: 1/6/2/7;
       margin: 1rem;
     }
@@ -438,6 +472,53 @@
     .btn:focus {
         outline: none;
         box-shadow: 0 0 0 0.189rem rgba(0, 123, 255, 0.5);
+    }
+
+    /* Basic Modal Styles */
+    .database-update-confirmation {
+      display: none;
+      position: fixed;
+      z-index: 1000; /* Ensure it's on top */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent background */
+    }
+
+    .dbupdate-confrimation-content {
+      background-color: #fefefe;
+      margin: 15% auto; /* Center the modal */
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%; /* Could be more specific */
+      max-width: 500px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .confrimation-inner-buttons {
+      text-align: right; /* Align buttons to the right */
+      margin-top: 10px;
+    }
+
+    .confrimation-inner-buttons button {
+      padding: 8px 16px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .confrimation-inner-buttons button:first-child {
+      background-color: #4CAF50; /* Example green color for confirm */
+      color: white;
+    }
+
+    .confrimation-inner-buttons button:last-child {
+      background-color: #f44336; /* Example red color for cancel */
+      color: white;
     }
     .fullform{
       /* word-wrap:break-word; */

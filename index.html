@@ -236,9 +236,19 @@
         <button class="btn btn__1" component-tooltip="Click to submit the Attribute selection">OK</button>
     </div>
       <button class="btn btn__2" component-tooltip="Click to clear all the previous selection in the memory">CLEAR</button>
-      <!-- <button class="btn btn__3">DOWNLOAD</button> -->
-      <!-- <button class="btn btn__5">IMPORT</button> but this is going to be a huge implementation. Not Possible as of now. -->
-      <!-- <button class="btn btn__4">SAVE/EXPORT</button> if the print is going to take me to the inbuilt print view of Windows where i am going to get the option to save the file as pdf or print it on the paper, should a dedicated save be give. Export can be useful. Postgre will export the current querried table in .csv formate. but the problem is that this table can be of any size and excel won't open such file and the end user intended to use this application is expected not to be tech-savy enough that they may need the use of a .csv file. Such kind of request can be sent to tech support and they will give the required table from the database itself. Plus this will lead to a loose end into the system where a person, without much access can use this system alone to get the data of a huge number of candidate. We don't want that. -->
+      <!-- to update the examname in the exam name dropdown menu -->
+      <button class="btn btn__7" id="databaseUpdatePoint">database update</button>
+      <div id="confirmationModal" class="database-update-confirmation">
+        <div class="dbupdate-confrimation-content">
+            <p class="dbupdate-confirmation-message">This button should be used only after database updation to get the new exam records or redacted exam name list after removal of some records. Press this button only in these conditions. Do you want to proceed?</p>
+            <div class="confrimation-inner-buttons">
+              <button id="confirmDBUpdate">UPDATE</button>
+              <button id="cancelDBUpdate">CANCEL</button>
+            </div>
+        </div>
+    </div> 
+      
+      
       
       <div class="stats">
         <h2>STATS:</h2>

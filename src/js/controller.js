@@ -2,9 +2,12 @@
 // SuperNote: always push the code to git after pulling the code from repo. code for pulling the code is 👉 git pull origin mirrorverse . where mirror verse is the name of the branch. you need to tell this or it will throw warning/error message.
 // const {populateTable, resetSummaryTable} = require('./populateSummaryTable');
 import { populateTable,resetSummaryTable } from './populateSummaryTable.js';// newly added23/7/24
-import {SUMMARYTABLE_API_URL,SUMMARYTABLE_API_LIMIT,SUMMARYTABLE_API_OFFSET,VENUESTATS_API_URL,VENUESTATS_API_LIMIT,VENUESTATS_API_OFFSET, FETCHRECORDCOUNT_API_URL, VIEWRECORDS_API_URL, VIEWRECORDS_API_LIMIT, VIEWRECORDS_API_OFFSET, DOWNLOADRECORDS_API_URL, VIEWRECORDSBYSTREAMING_API_URL} from './config.js';
+import {SUMMARYTABLE_API_URL,SUMMARYTABLE_API_LIMIT,SUMMARYTABLE_API_OFFSET,VENUESTATS_API_URL,VENUESTATS_API_LIMIT,VENUESTATS_API_OFFSET, FETCHRECORDCOUNT_API_URL, VIEWRECORDS_API_URL, VIEWRECORDS_API_LIMIT, VIEWRECORDS_API_OFFSET, DOWNLOADRECORDS_API_URL, VIEWRECORDSBYSTREAMING_API_URL, DISTINCT_EXAMNAME_DBUPDATE_URL} from './config.js';
 import { createStreamingView } from './viewDataStreamingModule.js';
-import { generateFormattedHTML } from "./dataViewingHtmlFormatter.js";
+// import { generateFormattedHTML } from "./dataViewingHtmlFormatter.js";
+import { showLoading, hideLoading } from "./loadingTimeAnimation.js";
+import { showConfirmationModal, createConfirmationModal } from "./databaseExamNameupdateconfirmationmodule.js";
+import { populateExamDropdown } from "./examDropDownupdate.js";
 // import { resolve } from 'path-browserify';// Issue Found
 
 
@@ -109,55 +112,7 @@ const examApplicants = {
   'UDC-D-2017': 80
 };// in absence of data in database, we decided to hardcode the number of applicants for each exam. So we are putting the data in the script. 
 
-// This function is for the content loading Animation
-function showLoading(element) {
-  // First of all, i will clear any existing loading animations
-  hideLoading(element);
-  
-  // then i am Creating loading animation container where the code for animated roundel will exist. And this will be pushed into other dives where animation has to be shown.
-  const loadingContainer = document.createElement('div');
-  loadingContainer.className = 'loading-container';
-  loadingContainer.innerHTML = `
-    <div Class="loading-wrapper">
-        <div Class="ripple-background"></div>
-          <div class="sscicon-spinner">
-            <img src="/img/ssc_logo_trans.png" alt="Loading" class="rotating-sscicon">
-          </div>
-      <div class="loading-text">Loading. Please Wait.</div>
-    </div>
-  `;
-  
-  // Store original position if not already relative
-  if (getComputedStyle(element).position === 'static') {
-    element.style.position = 'relative';
-  };
-  
-  element.appendChild(loadingContainer);
 
-
-  //Loading Percentages: this isn't real percentage loader. It's simulated one. I will implement real one latter on.
-  /*forced stop legacy code this is not to be used when implementing real percentage loader.
-
-  const loadingText=loadingContainer.querySelector('.loading-text');
-  let progress = 0;
-  const updateProgress= () => {	
-    progress = Math.min(progress + Math.floor(Math.random()*15), 100);
-    loadingText.textContent = `Loading: ${progress}%`;
-
-    if(progress<100){
-      setTimeout(updateProgress, Math.floor(Math.floor(Math.random()*500))+200);
-    };
-  	};
-    updateProgress();
-    */
-}
-
-function hideLoading(element) {
-  const existingLoader = element.querySelector('.loading-container');
-  if (existingLoader) {
-    existingLoader.remove();
-  }
-}
 /*legacy code
 function updateLoadingProgress(percentage) {
   const loadingText=document.querySelector('.loading-text');
@@ -390,28 +345,7 @@ async function fetchRecordCount(parameterObjData) {
     console.error('Error fetching record count:', error);
     return null;
   }
-}//newly added 11/12/2024
-/*legacy code
-async function fetchRecordCount(parameterObjData) {
-  try {
-    const response = await fetch(`${FETCHRECORDCOUNT_API_URL}`,
-      {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(parameterObjData),//💀Super i forgot to stringify the raw data input stream. Hence it was giving error. Don't do it agian.⚡
-    });
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error:', error);
-    return null;
-  }
 };
-*/
 
 // New async function to fetch venue statistics
 async function fetchVenueStat(parameterObjData) {
@@ -459,78 +393,7 @@ async function fetchVenueStat(parameterObjData) {
     console.error('Error fetching city stats:', error);
     resetExamCenters();
   }
-}
-
-
-/*Usless Coding forced stop: this code is working fine👍🏼. But, since my loading cycle of the content is only two stage, the upload appears in two stage, 50% for sending the request and 50% for receiving answer. I can change % weightage, but the progress show won't be continuous like 1% then 11% ...13%...24% till 100%. It will be show up in two stage only. Hence, i am suppressing the real percentage content. 
-async function fetchVenueStat(parameterObjData) {
-  return new Promise((ifPromiseResolves,ifPromiseRejected) => {	
-    const xhr = new XMLHttpRequest();
-
-    xhr.open('POST', `${VENUESTATS_API_URL}?limit=${VENUESTATS_API_LIMIT}&offset=${VENUESTATS_API_OFFSET}`, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-
-    //here we are going to track the upload of the request, latter for download and then, together, the load percentage will be determined
-    xhr.upload.onprogress = (event) => {	
-      if (event.lengthComputable) {
-        const uploadProgress= Math.round((event.loaded/event.total)*50);
-        updateLoadingProgress(uploadProgress);
-      }
-    	};
-
-    //progress tracking for download
-    xhr.onprogress=(event) => {	
-      if (event.lengthComputable) {
-        const downloadProgress= Math.round(50+(event.loaded/event.total)*50);
-        updateLoadingProgress(downloadProgress);
-      }
-    	};
-
-      xhr.onload=async () => {	
-        try {
-          if (xhr.status === 200) {
-            const data = JSON.parse(xhr.responseText);
-            
-            // update loading to 100% when loading is done
-            updateLoadingProgress(100);
-            // console.log(data);//Code Testing
-            // console.log(data.records);// Code Testing
-            // console.log(data.records.city_stats);// Code Testing
-            
-            
-            //Your existing data processing logic
-            if (data.records && data.records.city_stats) {
-              updateExamCenters(data.records.city_stats);
-              updateStateExamCenters(data.records.state_stats);
-              updateZoneCenters(data.records.zone_stats);
-            } else {
-              console.error('Unexpected data structure: ',data);
-              resetExamCenters();
-            };
-            ifPromiseResolves(data);
-          } else {
-            throw new Error("Network Response was not OK");
-          }
-        } catch (error) {
-          console.error('Error processing city stats:', error);
-          resetExamCenters();
-          updateLoadingProgress(0);
-          reject(error);
-        }
-      };
-
-      xhr.onerror = () => {	
-        console.error('Error fetching city stats');
-        resetExamCenters();
-        updateLoadingProgress(0);
-        ifPromiseRejected(new Error('Network error'));
-      	};
-
-      //Send the request
-      xhr.send(JSON.stringify(parameterObjData));
-  	});
-}
-*/
+};
 
 // async funtion to fetch the data to populate summmaytable
 let dataToBtn5, dataToBtn6;
@@ -658,7 +521,7 @@ document.addEventListener('DOMContentLoaded',()=>{resetExamCenters();});
 document.querySelector('.btn__5').addEventListener('click', (e)=>{
   e.preventDefault();
   populateTable(dataToBtn5, 'numbers');//we aren't calling API in this code upgrade to bypass the Issue that we found👇🏼
-});//Issue Found: what is being sent in parameterSendingToApi json formate. Becouse the browser is saying that there is somekind of problem with it. Hence, i think, we need to defined the header for CORS error resolution and body of the json formate to solve the issue of proper key:value pair, that is being sent after this button is clicked. So the same for .btn__6 as well. But first let's see what's going out there in  parameterSendingToApi at this point. Issue Resolved: since backend is sending number and percentage data on first fetch itself, why do any more fetch. hence is simply used the data that came with the first fetch in fetchSummaryTable() function. after fetching the data, it sends the to populateTable() in the frontend side only. So i directly use the data comming and populateTable() when .btn__5 or .btn__6 are pressed.😎 And the CORS has been addressed in the backend. the is no such problem in my code as such. ⚡
+});//Issue Found: what is being sent in parameterSendingToApi json formate. Becouse the browser is saying that there is somekind of problem with it. Hence, i think, we need to defined the header for CORS error resolution and body of the json formate to solve the issue of proper key:value pair, that is being sent after this button is clicked. So the same for .btn__6 as well. But first let's see what's going out there in  parameterSendingToApi at this point. Issue Resolved: since backend is sending number and percentage data on first fetch itself, why do any more fetch. hence It is simply used as the data that came with the first fetch in fetchSummaryTable() function. after fetching the data, it sends the to populateTable() in the frontend side only. So i directly used the data comming and populateTable() when .btn__5 or .btn__6 are pressed.😎 And the CORS has been addressed in the backend. the is no such problem in my code as such. ⚡
 
 document.querySelector('.btn__6').addEventListener('click', (e) =>{ 
   // console.log(dataToBtn6);//Code Testing
@@ -666,327 +529,9 @@ document.querySelector('.btn__6').addEventListener('click', (e) =>{
   populateTable(dataToBtn6, 'percentage');
 });
 
-//----- To Add Data View functionality. 
-// This function provides template to dress data comming from our API.
-
-/*code in progress
-const viewButton = document.querySelector('.btn__4');
-let newTab=null;
-function generateFormattedHTML(data, currentPage, totalPages) {
-  const fields = ['EXAMNAME', 'REGID', 'ROLL', 'NAME', 'FATHERNAME', 'MOTHERNAME', 'DOB', 'GENDER', 'CAT1', 'CAT2', 'CAT3', 'WRTN1_APP', 'WRTN1_QLY', 'WRTN2_APP', 'WRTN2_QLY', 'WRTN3_APP', 'WRTN3_QLY', 'INTVW_APP', 'SKILL_APP', 'SKILL_QLY', 'PET_APP', 'PET_QLY', 'DME_APP', 'DME_QLY', 'RME_APP', 'RME_QLY', 'SELECTED', 'MARKS', 'ALLOC_POST', 'ALLOC_STAT', 'ALLOC_AREA', 'ALLOC_CAT', 'RANK', 'WITHHELD'];
-
-  // to Check if data is coming or undfined or not an array
-  if (!Array.isArray(data)) {
-    return `
-      <html>
-        <body>
-          <h1>Error: No data available</h1>
-          <p>Please try again or contact support if the problem persists.</p>
-        </body>
-      </html>
-    `;
-  }
-
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-      <title>Downloaded Exam Records</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          line-height: 1.6;
-          margin: 0;
-          padding: 20px;
-          background-color: #f4f4f4;
-        }
-        .container {
-          max-width: 100%;
-          margin: 0 auto;
-          background-color: #fff;
-          padding: 20px;
-          border-radius: 5px;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-          overflow-x: auto;
-        }
-        h1 {
-          color: #333;
-          text-align: center;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-        th, td {
-          padding: 8px;
-          border: 1px solid #ddd;
-          text-align: left;
-          font-size: 14px;
-        }
-        th {
-          background-color: #f2f2f2;
-          font-weight: bold;
-        }
-        tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
-        tr:hover {
-          background-color: #f5f5f5;
-        }
-        .pagination {
-          display: flex;
-          justify-content: center;
-          margin-top: 20px;
-        }
-        .pagination button {
-          margin: 0 5px;
-          padding: 5px 10px;
-          cursor: pointer;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>All Exams Records:</h1>
-        <table>
-          <thead>
-            <tr>
-              ${fields.map(field => `<th>${field}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${data.map(record => `
-              <tr>
-                ${fields.map(field => `<td>${record[field] || ''}</td>`).join('')}
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <div class="pagination">
-          <button id="prevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
-          <span>Page ${currentPage} of ${totalPages}</span>
-          <button id="nextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
-        </div>
-      </div>
-      <script>
-        let currentPage = ${currentPage};
-        let totalPages = ${totalPages};
-        
-        function changePage(newPage) {
-          if (window.opener && !window.opener.closed) {
-            window.opener.postMessage({ type: 'changePage', page: newPage }, '*');
-          } else {
-            // If in the same window, call viewRecords directly
-            window.viewRecords(window.parameterSendingToApi, newPage);
-          }
-        }
-        
-        document.getElementById('prevPage').addEventListener('click', () => {
-          if (currentPage > 1) {
-            changePage(currentPage - 1);
-          }
-        });
-        
-        document.getElementById('nextPage').addEventListener('click', () => {
-          if (currentPage < totalPages) {
-            changePage(currentPage + 1);
-          }
-        });
-      </script>
-    </body>
-    </html>
-  `;
-};
-
-async function fetchRecords(parameterObjData, page = 1, limit = 100) {
-  const offset = (page - 1) * limit;
-  try {
-    const response = await fetch(`http://127.0.0.1:3000/api/v1/records?limit=${limit}&offset=${offset}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(parameterObjData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log('API Response:', result); // Log the entire response
-
-    let data, totalRecords;
-
-    if (Array.isArray(result)) {
-      data = result;
-      totalRecords = result.length;
-    } else if (typeof result === 'object') {
-      if (Array.isArray(result.data)) {
-        data = result.data;
-      } else if (Array.isArray(result.records)) {
-        data = result.records;
-      } else {
-        throw new Error('No valid data array found in the response');
-      }
-      totalRecords = result.totalRecords || result.total || data.length;
-    } else {
-      throw new Error('Unexpected response format from server');
-    }
-
-    if (!data || data.length === 0) {
-      throw new Error('No records found');
-    }
-
-    return { data, totalRecords };
-  } catch (error) {
-    console.error('Error in fetchRecords:', error);
-    throw error;
-  }
-};
-
-async function viewRecords(parameterObjData, page = 1) {
-  try {
-    const { data, totalRecords } = await fetchRecords(parameterObjData, page);
-    const totalPages = Math.ceil(totalRecords / 100);
-    
-    const htmlContent = generateFormattedHTML(data, page, totalPages);
-    
-    if (newTab && !newTab.closed) {
-      newTab.close();
-    }
-    
-    newTab = window.open('', '_blank');
-    
-    if (!newTab) {
-      console.warn('Unable to open a new tab. Displaying data in the current window.');
-      document.body.innerHTML = htmlContent;
-      const scriptContent = htmlContent.match(/<script>([\s\S]*)<\/script>/)[1];
-      eval(scriptContent);
-    } else {
-      newTab.document.open();
-      newTab.document.write(htmlContent);
-      newTab.document.close();
-    }
-
-    // Set up message listener for pagination
-    window.removeEventListener('message', handlePageChange);
-    window.addEventListener('message', handlePageChange);
-
-  } catch (error) {
-    console.error('Error fetching or displaying data:', error);
-    const errorMessage = `
-      <h1>Error</h1>
-      <p>${error.message}</p>
-      <p>Please try again or contact support if the problem persists.</p>
-    `;
-    document.body.innerHTML = errorMessage;
-  }
-};
-async function handlePageChange(event) {
-  if (event.data && event.data.type === 'changePage') {
-    await viewRecords(window.parameterSendingToApi, event.data.page);
-  }
-}
-
-viewButton.addEventListener('click', async () => {
-  const parameterSendingToApi = {...selectedValues};
-  await viewRecords(window.parameterSendingToApi);
-});
-*/
-
-//working code code migrated to module dataViewingHtmlFormatter.js
-/*
-function generateFormattedHTML(data) {
-  const fields = ['EXAMNAME', 'REGID', 'ROLL', 'NAME', 'FATHERNAME', 'MOTHERNAME', 'DOB', 'GENDER', 'CAT1', 'CAT2', 'CAT3', 'WRTN1_APP', 'WRTN1_QLY', 'WRTN2_APP', 'WRTN2_QLY', 'WRTN3_APP', 'WRTN3_QLY', 'INTVW_APP', 'SKILL_APP', 'SKILL_QLY', 'PET_APP', 'PET_QLY', 'DME_APP', 'DME_QLY', 'RME_APP', 'RME_QLY', 'SELECTED', 'MARKS', 'ALLOC_POST', 'ALLOC_STAT', 'ALLOC_AREA', 'ALLOC_CAT', 'RANK', 'WITHHELD'];
-
-  // console.log(data[0]);// Code Testing {EXAMNAME: 'AWO/TPO-2022', REGID: '40000295702', ROLL: '1402000028', NAME: 'SWEETY', FATHERNAME: 'MAHAVIR SINGH', …}
-
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-      <link
-        href="https://fonts.googleapis.com/css?family=Nunito+Sans:400,600,700"
-        rel="stylesheet"
-      />
-      <title>SSC Exam Records</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          line-height: 1.6;
-          margin: 0;
-          padding: 20px;
-          background-color: #f4f4f4;
-        }
-        .container {
-          max-width: 100%;
-          margin: 0 auto;
-          background-color: #fff;
-          padding: 20px;
-          border-radius: 5px;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-          overflow-x: auto;
-        }
-        h1 {
-          color: #333;
-          text-align: center;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-        th, td {
-          padding: 8px;
-          border: 1px solid #ddd;
-          text-align: left;
-          font-size: 14px;
-        }
-        th {
-          background-color: #f2f2f2;
-          font-weight: bold;
-        }
-        tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
-        tr:hover {
-          background-color: #f5f5f5;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>${data[0].EXAMNAME} Exam Records:</h1>
-        <table>
-          <thead>
-            <tr>
-              ${fields.map(field => `<th>${field}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${data.map(record => `
-              <tr>
-                ${fields.map(field => `<td>${record[field] || ''}</td>`).join('')}
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    </body>
-    </html>
-  `;
-}; 
-*/
 
 const viewButton = document.querySelector('.btn__4');
+/*legacy code
 //here we are calling the api endpoint in viewRecords function
 async function viewRecords(parameterObjData){
 try {
@@ -1011,6 +556,7 @@ try {
     alert('Failed to fetch data. Please try again.');
   }
 };
+*/
 console.log(selectedValues);//Code Testing
 
 
@@ -1044,16 +590,25 @@ export async function viewRecordsByStreaming(parameterObjData) {
         //     success: false, 
         //     error: error.message 
         // });
-    }
+    };
 };
 
 //here eventlisteners are being pasted upon the ViewButton.
 viewButton.addEventListener('click', async (e) => {
   e.preventDefault();
+
+      // loading animation
+        const mainPageContainerDiv=document.querySelector('.container');
+        showLoading(mainPageContainerDiv);
+
   const parameterSendingToApi = {...selectedValues};
   console.log(parameterSendingToApi, selectedValues);//Code Testing
   // await viewRecords(parameterSendingToApi);// forced stop to test the function viewRecordsByStreaming()
   await viewRecordsByStreaming(parameterSendingToApi);
+  
+      // hide loading animation
+        hideLoading(mainPageContainerDiv);
+
 });
 
 
@@ -1216,6 +771,66 @@ downloadButton.addEventListener('click', async (e) => {
   
   await downloadRecords(parameterSendingToApi);
 });
+
+
+export async function fetchDistinctExamNamesDBUpdate() {
+  try {
+    const response = await fetch(`${DISTINCT_EXAMNAME_DBUPDATE_URL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      // body: JSON.stringify(),// no parameter is being passed becouse there is no need of parameter from the frontend to be sent to the target backend method. Becouse that works without any parameters.
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to get distinct exam names from the backend side: ${response.status} ${response.statusText}`);
+    }
+    
+    const examNames = await response.json();// returns array.
+    
+    return {
+      success: true,
+      data: examNames
+    };// though backend is returning an array, this line here is creating an object with two parameters. success and data. 
+  } catch (error) {
+    console.error('Had an Error while fetching exam names:', error);
+    throw new Error(`failed to fetch distinct examnames: ${error.message}`);
+  };
+};
+const databaseUpdateButton = document.querySelector('.btn__7');
+const refreshButton = document.getElementById('confirmDBUpdate');// button on final confirmation notification
+
+databaseUpdateButton.addEventListener('click', async (e) => {
+  e.preventDefault();
+  
+  const message = 'This button should be used only after database updation to get the new exam records or redacted exam name list after removal of some records. Press this button only in these conditions. Do you want to proceed?';
+  
+    showConfirmationModal(message, async () => {
+      //Knowledge GapConcept: i tried to use async (e)=>{e.preventDefault() and so on...} becouse i had this understanding that any interaction generates event object 'e'. And this e may have it's default nature set to it. Hence, it is always good to disable the default nature of the element and move ahead. But it started causing problem like "Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'preventDefault')". on further research, i found that this understanding of mine is correct only if the element in subject is either a built in element of the JS or it has been specified that there is a default behaviour of the element. in my case, this element isn't built in and it doesn't have a default event object which we were addressing as e. now since there is nothing like e, there won't be any thing to prevent default at the first place. hence this error.  
+      try {
+        const result = await fetchDistinctExamNamesDBUpdate();
+        // console.log(result.data);//Code Testing
+        
+        if (result && result.success) {
+          populateExamDropdown(result.data);// frontend module that actually does the job of updating. 
+          // console.log("EXAMs Dropdown menu has been updated. Please check");//Code Testing
+          alert("EXAMs Dropdown Menu has been updated. Please Check. May take 15 seconds");
+        } else {
+          // console.error("Failed to update EXAMs Dropdown menu: ",result.error || "unknown error");//Code Testing
+          alert("Failed to update EXAMs Dropdown menu")
+        }
+      } catch (error) {
+        console.error("Error during database update or dropdown population:", error);
+      }
+    });
+  
+  // const newExamNamesAfterDBUpdate= await fetchDistinctExamNamesDBUpdate();
+  // console.log(newExamNamesAfterDBUpdate, typeof(newExamNamesAfterDBUpdate));//Code Testing {success: true, data: Array(64)} "object"
+  // console.log(newExamNamesAfterDBUpdate.data, Array.isArray(newExamNamesAfterDBUpdate.data));//Code Testing array like ['AWO/TPO-2022', 'CAPF-2016', 'CAPF-2017',... 'UDC-D-2017'] false
+  // populateExamDropdown(newExamNamesAfterDBUpdate.data);
+});
+
 
 
 export { selectedValues };

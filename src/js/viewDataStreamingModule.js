@@ -4,7 +4,7 @@
 
 import { VIEWRECORDSBYSTREAMING_API_URL, VIEWRECORDSBYSTREAMING_BATCHSIZE } from "./config.js";
 import { generateFormattedHTML } from "./dataViewingHtmlFormatter.js";
-
+import { showLoading, hideLoading } from "./loadingTimeAnimation.js";
 
 // Array of fields that exist in the data base as columns
 const RECORD_FIELDS = [
@@ -149,9 +149,11 @@ class StreamingRecordsManager {
                 <style>${css}</style>
             </head>
             <body>
+                <div class="container-viewtab">
                 <div id="records-count">Records: 0</div>
                 <div class="container"></div>
                 <div id="loading">Starting stream...</div>
+                </div>
             </body>
             </html>
         `;
@@ -169,16 +171,24 @@ class StreamingRecordsManager {
 
     // Initialization logic, opens a new tab and sets up event listeners
     init() {
-        this.newTab = window.open('', '_blank');
-        this.setupInitialHTML();
-        
-        // Set up event listeners
-        this.newTab.addEventListener('scroll', this.handleScroll);
-        window.addEventListener('unload', this.cleanup);
-        
-        // Start loading data
-        this.loadMoreRecords();
-        this.initialLoad();
+        // const containerViewTabDiv=document.querySelector('.container-viewtab');
+        // showLoading(containerViewTabDiv);//Bug not working here
+        try {
+            this.newTab = window.open('', '_blank');
+            this.setupInitialHTML();
+            
+            // Set up event listeners
+            this.newTab.addEventListener('scroll', this.handleScroll);
+            window.addEventListener('unload', this.cleanup);
+            
+            // Start loading data
+            this.loadMoreRecords();
+            this.initialLoad();
+
+            // hideLoading(containerViewTabDiv);//Bugnot working here. 
+        } catch (error) {
+            console.error("Error while initializing the new ViewTab: ",error);
+        };
     };
 
     // ================================================================================
