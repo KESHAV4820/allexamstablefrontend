@@ -773,6 +773,23 @@ downloadButton.addEventListener('click', async (e) => {
 });
 
 
+
+// Function to load exam names from local storage on page load
+function loadExamNamesFromLocalStorage() {
+  const storedExamNames = localStorage.getItem('examNames');
+  if (storedExamNames) {
+      try {
+          const examNames = JSON.parse(storedExamNames);
+          populateExamDropdown(examNames);
+      } catch (error) {
+          console.error('Error parsing exam names from local storage:', error);
+          // we can also clear invalid data from local storage:(option)
+          // localStorage.removeItem('examNames');
+      }
+  }
+}
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', loadExamNamesFromLocalStorage);
 export async function fetchDistinctExamNamesDBUpdate() {
   try {
     const response = await fetch(`${DISTINCT_EXAMNAME_DBUPDATE_URL}`, {
@@ -807,7 +824,7 @@ databaseUpdateButton.addEventListener('click', async (e) => {
   const message = 'This button should be used only after database updation to get the new exam records or redacted exam name list after removal of some records. Press this button only in these conditions. Do you want to proceed?';
   
     showConfirmationModal(message, async () => {
-      //Knowledge GapConcept: i tried to use async (e)=>{e.preventDefault() and so on...} becouse i had this understanding that any interaction generates event object 'e'. And this e may have it's default nature set to it. Hence, it is always good to disable the default nature of the element and move ahead. But it started causing problem like "Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'preventDefault')". on further research, i found that this understanding of mine is correct only if the element in subject is either a built in element of the JS or it has been specified that there is a default behaviour of the element. in my case, this element isn't built in and it doesn't have a default event object which we were addressing as e. now since there is nothing like e, there won't be any thing to prevent default at the first place. hence this error.  
+      //Knowledge GapConcept: i tried to use async (e)=>{e.preventDefault() and so on...} becouse i had this understanding that any interaction generates event object 'e'. And this e may have it's default nature set to it. Hence, it is always good to disable the default nature of the element and move ahead. But it started causing problem like "Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'preventDefault')". on further research, i found that this understanding of mine is correct only if the element in subject is either a built in element of the JS or it has been specified that there is a default behaviour of the element. in my case, this element isn't built in and it doesn't have a default event object which we were addressing as e. now since there is nothing like e, there won't be any default nature thing to prevent default at the first place. hence that error.  
       try {
         const result = await fetchDistinctExamNamesDBUpdate();
         // console.log(result.data);//Code Testing

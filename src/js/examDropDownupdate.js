@@ -13,20 +13,34 @@ function populateExamDropdown(examNames) {
         return;
     };
     
-    // to clear what ever existed before this point in time.
-    dropdownContent.innerHTML = '';
+    // // to clear what ever existed before this point in time.
+    // dropdownContent.innerHTML = '';
     
     
-    // const updatedExamNameReceived = [...examNames];// Usless Codingcode upgrade
+    // // const updatedExamNameReceived = [...examNames];// Usless Codingcode upgrade
     
-    // Creating and appending anchor elements for each exam
-    [...examNames].forEach(examName => {
-      const anchor = document.createElement('a');
-      anchor.href = '#';
-      anchor.setAttribute('value', examName);
-      anchor.textContent = examName;
-      dropdownContent.appendChild(anchor);
+    // // Creating and appending anchor elements for each exam
+    // [...examNames].forEach(examName => {
+    //   const anchor = document.createElement('a');
+    //   anchor.href = '#';
+    //   anchor.setAttribute('value', examName);
+    //   anchor.textContent = examName;
+    //   dropdownContent.appendChild(anchor);
+    // });
+
+    const existingExamNames = Array.from(dropdownContent.querySelectorAll('a')).map(a => a.textContent);
+    const newExamNames = examNames.filter(name => !existingExamNames.includes(name));
+
+    newExamNames.forEach(examName => {
+        const anchor = document.createElement('a');
+        anchor.href = '#';
+        anchor.setAttribute('value', examName);
+        anchor.textContent = examName;
+        dropdownContent.appendChild(anchor);
     });
+
+    localStorage.setItem('examNames', JSON.stringify(examNames));
+
   }
 
   export {populateExamDropdown};
