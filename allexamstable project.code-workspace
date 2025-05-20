@@ -1,19 +1,32 @@
 {
 	"folders": [
 		{
+			"name": "allexamstable project",
 			"path": "."
 		},
 		{
+			"name": "allexamstable_backend_project",
 			"path": "../allexamstable_backend_project"
 		},
 		{
+			"name": "d3jslessons",
 			"path": "../d3jslessons"
 		},
 		{
+			"name": "learningPython",
 			"path": "../learningPython"
 		},
 		{
+			"name": "learningDataAnalytics",
+			"path": "../learningDataAnalytics"
+		},
+		{
+			"name": "learningReact",
 			"path": "../learningReact"
+		},
+		{
+			"name": "allexamstable_python_scripst",
+			"path": "../allexamstable_python_scripst"
 		}
 	],
 	"settings": {
