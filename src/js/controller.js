@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {console.log('DOMContentLoad
 async function fetchRecordCount(parameterObjData) {
   try {
     const {controller, clientId} = fetchRecordCountRequestManager.getNewController();
-    console.log(`In fetchRecordCount() controller: ${controller} clientId: ${clientId}`);//debugging log
+    // console.log(`In fetchRecordCount() controller: ${controller} clientId: ${clientId}`);//debugging log
     
     const response = await fetch(`${FETCHRECORDCOUNT_API_URL}`, {
       method: 'POST',
