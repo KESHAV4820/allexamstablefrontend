@@ -850,5 +850,13 @@ databaseUpdateButton.addEventListener('click', async (e) => {
 });
 
 
+// Fetch function for distinct exam names(it will be used on page load and refresh)
+export async function fetchDistinctExamNamesV2(){};
+
+
+// Fetch function for the filters associated with selected exam names
+export async function fetchExamFilters(){};
+
+
 
 export { selectedValues };

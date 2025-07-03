@@ -23,3 +23,7 @@ export const SUMMARYTABLE_API_OFFSET=0;
 
 export const DISTINCT_EXAMNAME_DBUPDATE_URL=`${localHost}/api/v1/databaserecordsupdate`;
 
+export const DISTINCT_EXAMNAME_API_URL_V2=`${localHost}/api/v2/examnames`;
+
+export const EXAM_FILTERS_API_URL_V2=`${localHost}/api/v2/examnames/filters`;
+
