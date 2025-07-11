@@ -2,12 +2,13 @@
 // SuperNote: always push the code to git after pulling the code from repo. code for pulling the code is 👉 git pull origin mirrorverse . where mirror verse is the name of the branch. you need to tell this or it will throw warning/error message.
 // const {populateTable, resetSummaryTable} = require('./populateSummaryTable');
 import { populateTable,resetSummaryTable } from './populateSummaryTable.js';// newly added23/7/24
-import {SUMMARYTABLE_API_URL,SUMMARYTABLE_API_LIMIT,SUMMARYTABLE_API_OFFSET,VENUESTATS_API_URL,VENUESTATS_API_LIMIT,VENUESTATS_API_OFFSET, FETCHRECORDCOUNT_API_URL, VIEWRECORDS_API_URL, VIEWRECORDS_API_LIMIT, VIEWRECORDS_API_OFFSET, DOWNLOADRECORDS_API_URL, VIEWRECORDSBYSTREAMING_API_URL, DISTINCT_EXAMNAME_DBUPDATE_URL} from './config.js';
+import {SUMMARYTABLE_API_URL,SUMMARYTABLE_API_LIMIT,SUMMARYTABLE_API_OFFSET,VENUESTATS_API_URL,VENUESTATS_API_LIMIT,VENUESTATS_API_OFFSET, FETCHRECORDCOUNT_API_URL, VIEWRECORDS_API_URL, VIEWRECORDS_API_LIMIT, VIEWRECORDS_API_OFFSET, DOWNLOADRECORDS_API_URL, VIEWRECORDSBYSTREAMING_API_URL, DISTINCT_EXAMNAME_DBUPDATE_URL, DISTINCT_EXAMNAME_API_URL_V2, EXAM_FILTERS_API_URL_V2} from './config.js';
 import { createStreamingView } from './viewDataStreamingModule.js';
 // import { generateFormattedHTML } from "./dataViewingHtmlFormatter.js";
 import { showLoading, hideLoading } from "./loadingTimeAnimation.js";
 import { showConfirmationModal, createConfirmationModal } from "./databaseExamNameupdateconfirmationmodule.js";
 import { populateExamDropdown } from "./examDropDownupdate.js";
+import { initializePage, getSelectedValuesForAPI, selectedValues,updateOKButtonState } from './examDropDownupdate.js';// newly added 08/7/25
 // import { resolve } from 'path-browserify';// Issue Found
 
 
@@ -124,11 +125,30 @@ function updateLoadingProgress(percentage) {
 const parameterMap = {
   '1': 'EXAMNAME',
   '2': 'CAT1',
-  '3': 'SELECTED',//WRTN1_APP, WRTN1_QLY, WRTN2_APP, WRTN2_QLY, WRTN3_APP, WRTN3_QLY,INTVW_APP,SKILL_APP,SKILL_QLY, PET_APP, PET_QLY, DME_APP, DME_QLY, RME_APP, RME_QLY
-  '4': 'ALLOC_CAT',
+  '3': 'CAT2',
+  '4': 'CAT3',
   '5': 'GENDER',
-  '6': 'CAT2',
-  '7': 'CAT3',
+  '6': 'DME_APP',
+  '7': 'DME_QLY',
+  '8': 'PET_APP',
+  '9': 'PET_QLY',
+  '10': 'RME_APP',
+  '11': 'RME_QLY',
+  '12': 'SELECTED',
+  '13': 'WITHHELD',
+  '14': 'ALLOC_CAT',
+  '15': 'INTVW_APP',
+  '16': 'SKILL_APP',
+  '17': 'SKILL_QLY',
+  '18': 'WRTN1_APP',
+  '19': 'WRTN1_QLY',
+  '20': 'WRTN2_APP',
+  '21': 'WRTN2_QLY',
+  '22': 'WRTN3_APP',
+  '23': 'WRTN3_QLY',
+  '24': 'ALLOC_AREA',
+  '25': 'ALLOC_POST',
+  '26': 'ALLOC_STAT',
 };// Note The parameters mentioned here have the same name as the names of the column in the database.Super but the order of their appearance is according to the order of the dropdown buttons in the frontend section. 
 
 // This is a function that will be used by the program to create template and enter the city names and their student counts.
@@ -238,21 +258,21 @@ dropdownContainers.forEach(dropdown => {
 
 const okButton = document.querySelector('.btn__1');
 
-function updateOKButtonState() {
-  const filledDropdowns = Array.from(dropdownContainers).filter(dropdown => 
-    dropdown.querySelector('.selected-value').getAttribute('data-value') !== null
-  );
-  okButton.disabled = filledDropdowns.length === 0;
-}
+// function updateOKButtonState() {
+//   const filledDropdowns = Array.from(dropdownContainers).filter(dropdown => 
+//     dropdown.querySelector('.selected-value').getAttribute('data-value') !== null
+//   );
+//   okButton.disabled = filledDropdowns.length === 0;
+// }
 
 updateOKButtonState();
 
 //Event listeners on OK button.
-okButton.addEventListener('click', (e) => {
-    e.preventDefault();
-  const lockedSelectedValues = JSON.stringify(selectedValues, null, 2);
-  console.log('Selected Values:', lockedSelectedValues);//VIECode Testing
-});// VIESuper to check inputs comming from frontend. 
+// okButton.addEventListener('click', (e) => {
+//     e.preventDefault();
+//   const lockedSelectedValues = JSON.stringify(selectedValues, null, 2);
+//   console.log('Selected Values:', lockedSelectedValues);//VIECode Testing
+// });// VIESuper to check inputs comming from frontend. 
 
 // Initialize default values for spans
 dropdownContainers.forEach(dropdown => {
@@ -444,50 +464,54 @@ async function fetchSummaryTable(parameterObjData,displayType = 'numbers') {
 };
 
 
+
+
 // to call fetchRecordCount() function every time i press OK button. Actually to set the value in the "<span></span>" element. 
-okButton.addEventListener('click', async (e) => {
-  e.preventDefault();
+// okButton.addEventListener('click', async (e) => {
+//   e.preventDefault();
 
-const examCentersDiv=document.querySelector('.examcenters');
-const summaryTable=document.querySelector('.summarytable');
+// const examCentersDiv=document.querySelector('.examcenters');
+// const summaryTable=document.querySelector('.summarytable');
 
-showLoading(examCentersDiv);
-showLoading(summaryTable);
+// showLoading(examCentersDiv);
+// showLoading(summaryTable);
 
-  const parameterSendingToApi = {};
-  dropdownContainers.forEach(dropdown => {
-    const span = dropdown.querySelector('.selected-value');
-    const value = span.getAttribute('data-value');
-    const param = span.getAttribute('data-param');
-    if (value !== null && param !== null) {
-      parameterSendingToApi[param] = value;
-    }
-  });
-    // console.log('Selected Values:', JSON.stringify(parameterSendingToApi, null, 2));//VIECode Testing
+//   const parameterSendingToApi = {};
+//   dropdownContainers.forEach(dropdown => {
+//     const span = dropdown.querySelector('.selected-value');
+//     const value = span.getAttribute('data-value');
+//     const param = span.getAttribute('data-param');
+//     if (value !== null && param !== null) {
+//       parameterSendingToApi[param] = value;
+//     }
+//   });
+//     // console.log('Selected Values:', JSON.stringify(parameterSendingToApi, null, 2));//VIECode Testing
 
-  const recordCount = await fetchRecordCount(parameterSendingToApi);
-  if (recordCount !== null) {
-    document.getElementById('recordsOfData').textContent = recordCount;
-  } else {
-    console.error('fetch record count is not working. This error is comming from LOC 205 around');
-  };
+//   const recordCount = await fetchRecordCount(parameterSendingToApi);
+//   if (recordCount !== null) {
+//     document.getElementById('recordsOfData').textContent = recordCount;
+//   } else {
+//     console.error('fetch record count is not working. This error is comming from LOC 205 around');
+//   };
 
-  const applicantCount = examApplicants[parameterSendingToApi.EXAMNAME] || 0;
-  document.getElementById('noOfApplicant').textContent = applicantCount;
-  // console.log(parameterSendingToApi);//Code Testing
+//   const applicantCount = examApplicants[parameterSendingToApi.EXAMNAME] || 0;
+//   document.getElementById('noOfApplicant').textContent = applicantCount;
+//   // console.log(parameterSendingToApi);//Code Testing
   
-  try {
-    // Fetching and update exam center stats
-    await fetchVenueStat(parameterSendingToApi);
-    //Fetching and updating the summary table in numbers by default
-    await fetchSummaryTable(parameterSendingToApi,'numbers'); 
-  }catch (error) {
-   console.error('Error fetching data: ', error) 
-  }finally{
-    hideLoading(examCentersDiv);
-    hideLoading(summaryTable);
-  }
-});
+//   try {
+//     // Fetching and update exam center stats
+//     await fetchVenueStat(parameterSendingToApi);
+//     //Fetching and updating the summary table in numbers by default
+//     await fetchSummaryTable(parameterSendingToApi,'numbers'); 
+//   }catch (error) {
+//    console.error('Error fetching data: ', error) 
+//   }finally{
+//     hideLoading(examCentersDiv);
+//     hideLoading(summaryTable);
+//   }
+// });
+
+
 
 // similarly CLEAR button functionaliyt
 const clearButton = document.querySelector('.btn__2');
@@ -775,88 +799,146 @@ downloadButton.addEventListener('click', async (e) => {
 
 
 
-// Function to load exam names from local storage on page load
-function loadExamNamesFromLocalStorage() {
-  const storedExamNames = localStorage.getItem('examNames');
-  if (storedExamNames) {
-      try {
-          const examNames = JSON.parse(storedExamNames);
-          populateExamDropdown(examNames);
-      } catch (error) {
-          console.error('Error parsing exam names from local storage:', error);
-          // we can also clear invalid data from local storage:(option)
-          // localStorage.removeItem('examNames');
-      }
-  }
-}
-// Call this function when the page loads
-document.addEventListener('DOMContentLoaded', loadExamNamesFromLocalStorage);
-export async function fetchDistinctExamNamesDBUpdate() {
+
+
+
+// // Function to load exam names from local storage on page load
+// function loadExamNamesFromLocalStorage() {
+//   const storedExamNames = localStorage.getItem('examNames');
+//   if (storedExamNames) {
+//       try {
+//           const examNames = JSON.parse(storedExamNames);
+//           populateExamDropdown(examNames);
+//       } catch (error) {
+//           console.error('Error parsing exam names from local storage:', error);
+//           // we can also clear invalid data from local storage:(option)
+//           // localStorage.removeItem('examNames');
+//       }
+//   }
+// }// code abandoned
+// // Call this function when the page loads
+// document.addEventListener('DOMContentLoaded', loadExamNamesFromLocalStorage);
+// export async function fetchDistinctExamNamesDBUpdate() {
+//   try {
+//     const response = await fetch(`${DISTINCT_EXAMNAME_DBUPDATE_URL}`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       // body: JSON.stringify(),// no parameter is being passed becouse there is no need of parameter from the frontend to be sent to the target backend method. Becouse that works without any parameters.
+//     });
+    
+//     if (!response.ok) {
+//       throw new Error(`Failed to get distinct exam names from the backend side: ${response.status} ${response.statusText}`);
+//     }
+    
+//     const examNames = await response.json();// returns array.
+    
+//     return {
+//       success: true,
+//       data: examNames
+//     };// though backend is returning an array, this line here is creating an object with two parameters. success and data. 
+//   } catch (error) {
+//     console.error('Had an Error while fetching exam names:', error);
+//     throw new Error(`failed to fetch distinct examnames: ${error.message}`);
+//   };
+// };// code abandoned
+// const databaseUpdateButton = document.querySelector('.btn__7');
+// const refreshButton = document.getElementById('confirmDBUpdate');// button on final confirmation notification
+
+// databaseUpdateButton.addEventListener('click', async (e) => {
+//   e.preventDefault();
+  
+//   const message = 'This button should be used only after database updation to get the new exam records or redacted exam name list after removal of some records. Press this button only in these conditions. Do you want to proceed?';
+  
+//     showConfirmationModal(message, async () => {
+//       //Knowledge GapConcept: i tried to use async (e)=>{e.preventDefault() and so on...} becouse i had this understanding that any interaction generates event object 'e'. And this e may have it's default nature set to it. Hence, it is always good to disable the default nature of the element and move ahead. But it started causing problem like "Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'preventDefault')". on further research, i found that this understanding of mine is correct only if the element in subject is either a built in element of the JS or it has been specified that there is a default behaviour of the element. in my case, this element isn't built in and it doesn't have a default event object which we were addressing as e. now since there is nothing like e, there won't be any default nature thing to prevent default at the first place. hence that error.  
+//       try {
+//         const result = await fetchDistinctExamNamesDBUpdate();
+//         // console.log(result.data);//Code Testing
+        
+//         if (result && result.success) {
+//           populateExamDropdown(result.data);// frontend module that actually does the job of updating. 
+//           // console.log("EXAMs Dropdown menu has been updated. Please check");//Code Testing
+//           alert("EXAMs Dropdown Menu has been updated. Please Check. May take 15 seconds");
+//         } else {
+//           // console.error("Failed to update EXAMs Dropdown menu: ",result.error || "unknown error");//Code Testing
+//           alert("Failed to update EXAMs Dropdown menu")
+//         }
+//       } catch (error) {
+//         console.error("Error during database update or dropdown population:", error);
+//       }
+//     });
+  
+//   // const newExamNamesAfterDBUpdate= await fetchDistinctExamNamesDBUpdate();
+//   // console.log(newExamNamesAfterDBUpdate, typeof(newExamNamesAfterDBUpdate));//Code Testing {success: true, data: Array(64)} "object"
+//   // console.log(newExamNamesAfterDBUpdate.data, Array.isArray(newExamNamesAfterDBUpdate.data));//Code Testing array like ['AWO/TPO-2022', 'CAPF-2016', 'CAPF-2017',... 'UDC-D-2017'] false
+//   // populateExamDropdown(newExamNamesAfterDBUpdate.data);
+// });//code abandoned
+
+
+
+
+
+
+// Fetch function for distinct exam names(it will be used on page load and refresh)
+export async function fetchDistinctExamNamesV2(){
   try {
-    const response = await fetch(`${DISTINCT_EXAMNAME_DBUPDATE_URL}`, {
+    const response = await fetch(`${DISTINCT_EXAMNAME_API_URL_V2}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      // body: JSON.stringify(),// no parameter is being passed becouse there is no need of parameter from the frontend to be sent to the target backend method. Becouse that works without any parameters.
     });
     
     if (!response.ok) {
       throw new Error(`Failed to get distinct exam names from the backend side: ${response.status} ${response.statusText}`);
     }
     
-    const examNames = await response.json();// returns array.
+    const examNames = await response.json();
+    console.log(`data in variable examNames: ${examNames}`);//debugging log
     
     return {
       success: true,
       data: examNames
-    };// though backend is returning an array, this line here is creating an object with two parameters. success and data. 
+    };
   } catch (error) {
     console.error('Had an Error while fetching exam names:', error);
     throw new Error(`failed to fetch distinct examnames: ${error.message}`);
   };
 };
-const databaseUpdateButton = document.querySelector('.btn__7');
-const refreshButton = document.getElementById('confirmDBUpdate');// button on final confirmation notification
-
-databaseUpdateButton.addEventListener('click', async (e) => {
-  e.preventDefault();
-  
-  const message = 'This button should be used only after database updation to get the new exam records or redacted exam name list after removal of some records. Press this button only in these conditions. Do you want to proceed?';
-  
-    showConfirmationModal(message, async () => {
-      //Knowledge GapConcept: i tried to use async (e)=>{e.preventDefault() and so on...} becouse i had this understanding that any interaction generates event object 'e'. And this e may have it's default nature set to it. Hence, it is always good to disable the default nature of the element and move ahead. But it started causing problem like "Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'preventDefault')". on further research, i found that this understanding of mine is correct only if the element in subject is either a built in element of the JS or it has been specified that there is a default behaviour of the element. in my case, this element isn't built in and it doesn't have a default event object which we were addressing as e. now since there is nothing like e, there won't be any default nature thing to prevent default at the first place. hence that error.  
-      try {
-        const result = await fetchDistinctExamNamesDBUpdate();
-        // console.log(result.data);//Code Testing
-        
-        if (result && result.success) {
-          populateExamDropdown(result.data);// frontend module that actually does the job of updating. 
-          // console.log("EXAMs Dropdown menu has been updated. Please check");//Code Testing
-          alert("EXAMs Dropdown Menu has been updated. Please Check. May take 15 seconds");
-        } else {
-          // console.error("Failed to update EXAMs Dropdown menu: ",result.error || "unknown error");//Code Testing
-          alert("Failed to update EXAMs Dropdown menu")
-        }
-      } catch (error) {
-        console.error("Error during database update or dropdown population:", error);
-      }
-    });
-  
-  // const newExamNamesAfterDBUpdate= await fetchDistinctExamNamesDBUpdate();
-  // console.log(newExamNamesAfterDBUpdate, typeof(newExamNamesAfterDBUpdate));//Code Testing {success: true, data: Array(64)} "object"
-  // console.log(newExamNamesAfterDBUpdate.data, Array.isArray(newExamNamesAfterDBUpdate.data));//Code Testing array like ['AWO/TPO-2022', 'CAPF-2016', 'CAPF-2017',... 'UDC-D-2017'] false
-  // populateExamDropdown(newExamNamesAfterDBUpdate.data);
-});
-
-
-// Fetch function for distinct exam names(it will be used on page load and refresh)
-export async function fetchDistinctExamNamesV2(){};
 
 
 // Fetch function for the filters associated with selected exam names
-export async function fetchExamFilters(){};
+export async function fetchExamFiltersV2(examName){
+  try {
+    const response = await fetch(`${EXAM_FILTERS_API_URL_V2}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({EXAMNAME:examName}), // sending examName as a string
+    });
+    if (!response.ok) {
+      if (response.status === 404){
+        throw new Error('Exam not found');
+      }
+      throw new Error(`Failed to get filters for exam name ${examName}: ${response.status} ${response.statusText}`);
+    }
+    
+    const filters = await response.json();
+    console.log(`data received against examName: ${examName}in the variable named filters: ${filters}`);//debugging log
+    
+    return {
+      success: true,
+      data: filters
+    };
+  } catch (error) {
+    console.error('Had an Error while fetching exam filters:', error);
+    throw new Error(`failed to fetch exam filters for ${examName}: ${error.message}`);
+  };
+};
 
 
 
-export { selectedValues };
+export { selectedValues, examApplicants, fetchRecordCount,fetchVenueStat, fetchSummaryTable };
