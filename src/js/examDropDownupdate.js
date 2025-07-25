@@ -83,7 +83,7 @@ function populateExamDropdown(examNames){
     selectedValue.className = 'selected-value';
     selectedValue.textContent = formatFilterKey(filterKey); // Displaying the filter key as the selected value. Let's see the output.
     selectedValue.setAttribute('data-default', formatFilterKey(filterKey)); // Set a data attribute for the default value
-    selectedValue.setAttribute('data-value', null); // Set a data attribute for the filter key value
+    selectedValue.setAttribute('data-value', ''); // Set a data attribute for the filter key value
     selectedValue.setAttribute('data-param', filterKey); // Set a data attribute for the filter key parameter
     
     const dropdownContent = document.createElement('div');

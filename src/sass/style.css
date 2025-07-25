@@ -6,7 +6,8 @@
         height: 100%;
 
         /* grid-template-rows: 1fr, 1fr, 1fr, 1fr, 1fr, 1fr,1fr, 1fr, 1fr, 1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr;   20rows */
-        grid-template-rows: auto auto auto;
+        /* grid-template-rows: auto auto auto; forced stop 18/7/25 */
+        grid-template-rows: 120px 80px 400px;
         grid-template-columns: 1fr, 1fr, 1fr, 1fr, 1fr, 1fr,1fr,1fr;/*10 columns */
         /* grid-auto-rows: 30px;
         /* grid-template-columns: repeat(auto-fit, minmax(150px, 0.5fr)); */
@@ -17,7 +18,7 @@
         /* grid-gap: 5px; */
         grid-gap: 0.3rem;
         justify-content: center;
-        align-items: center;
+        align-items: start;
         overflow-y: hidden; /* Always show scrollbar. Always show scrollbar. I have done this to remove the preceived vibrations on the page due ot appearance and disappearnce of the scrollbar.*/
 
         
@@ -176,9 +177,10 @@
       padding-bottom: 1rem;
     }
     .dropdown-container{
-      grid-area: 3/1/9/2;      
+      /* grid-area: 2/1/12/2; forced stop18_7_2025  */
+      grid-area: 3/1/13/2; /*Fixed to single row */
     }
-    .dropdown__1{
+    /* .dropdown__1{
         grid-area: 4/1/5/2;        
     }
     .dropdown__2{
@@ -198,20 +200,20 @@
       }
     .dropdown__7{
       grid-area: 10/1/11/2;
-      }
+      } */
 
-    .btn__1{/*OK*/
+    /* .btn__1{
         grid-area: 11/1/12/2;
         width: 6.3125rem;
-    }
+    } */
     .btn__2{/*CLEAR*/
-        grid-area:  12/1/13/2;
+        grid-area:  13/1/14/2;
         /* margin-left: 2.3625rem; */
         width: 6.3125rem;
     }
-    .btn__7{/*Database Update*/
+    /* .btn__7{
         grid-area: 15/1/16/2;
-    }
+    } */
     /*ConceptNote: button with class= btn btn__7 also has the id=databaseUpdatePoint and reason why i am using id to style it, becouse the general styling based on .btn class is over-riding any styling changes that i am doing to btn__7. That's why i deed it. */
     #databaseUpdatePoint {
       /* display: inline-block; */
@@ -338,19 +340,52 @@
   
       /* Dropdown Menu Styles */
       .dropdown-container {
-        position: relative;
+        /* position: relative; */
         /* display: inline-block; */
         /* display: inline; */
-        display: contents;
-        width: 10.1rem;        
+        /* display: contents; */
+        /* width: 10.1rem;         */
+        /* grid-area: 3/1/9/2; */
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        overflow-y: auto;
+        /* min-height: 400px; Minimum visible area forced stop 21/7/25*/
+        /* max-height: 100%; Constrain to grid cell forced stop 21/7/25*/
+        height: 1400px;
+        max-height: 2000px;
+        padding: 0.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        background-color: rgba(255, 255, 255, 0.1);
       }
       .dropdown {
         position: relative;
         /* display: inline-block; */
-        display: inline;
+        display: block;/*inline;*/
         /* box-shadow: 0.54rem 0.54rem 0.675rem rgba(0, 0, 0, 0.589); this was making it darker becouse somehow, it isn't working on full body, only the downward edge and when mixed with shadow of dropdown span{} it becomes even more dark.*/
-        width: 10.1rem;
-        
+        /* width: 10.1rem; forced stop 21/7/25*/
+        width: 12rem;
+        margin-bottom: 0.3rem;
+        flex-shrink: 0;
+      }
+
+      /*Position OK button at the bottom*/
+      .btn__1{
+        width: 8.3125rem;
+        height: 4.5rem;
+        grid-area: 13/1/14/2;
+        justify-self: left;
+        margin-left: 80px;
+        margin-bottom: 30px; /* Adjusted to position above the footer */
+        /* margin-top: auto;
+        flex-shrink: 0;
+        align-self: flex-start; */
+        position: sticky;
+        bottom: 0; /* Adjusted to position above the footer */
+        z-index: 100; /* Ensure it stays on top */
+        background-color: #007bff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       }
 
       /* Style for the dropdown trigger */
@@ -361,9 +396,11 @@
       .dropdown-content {
         display: none;
         position: absolute;
-        z-index: 1;
-        min-width: 6.943rem;
-        width: 10.1rem;
+        z-index: 1000;
+        top: 100%;
+        left: 0;
+        min-width: 8rem;
+        width: 12rem;
         background-color: #f1f1f1;
         /* box-shadow: 0 0.5rem 1rem 0 rgba(0,0,0,0.2); */
         padding: 0.7575rem 0;
@@ -371,7 +408,6 @@
         max-height: 12.625rem;
         overflow-y: auto;
         /*to add transition effect*/
-        text-align: left;
         max-height: 0; /* Initially set max-height to 0 */
         opacity: 0; /* Initially set opacity to 0 */
         transition: max-height 0.3s ease, opacity 0.3s ease; /* Add transition effect */
@@ -400,14 +436,16 @@
   
       .dropdown > span {
         display: inline-block;
-        width: 6.3225rem;
+        /* width: 6.3225rem; forced stop 21/7/25*/
+        width: 8.5rem;
+        font-size: 0.85rem;
         height: 0.41rem;/*this sets y coordinate length of dropdown button in idle state*/
         padding: 0.7575rem 1.515rem;
         padding-bottom: 1.9rem;
         padding-top: 0.9rem;
         margin-top: 0.55rem;
         /* margin-bottom: 0.45rem;Never set this value. YOu won't be able to select your options from dropdown menu😂 */
-        font-size: 1.01rem;
+        /* font-size: 1.01rem; forced stop 21/7/25*/
         font-weight: bold;
         text-align:left;
         text-decoration: none;
@@ -430,13 +468,13 @@
   
       .dropdown > span:hover {
         background-color: #65f5fa;
-        width: 6.3225rem;
+        width: 8.5rem;
         height: 0.41rem;
       }
   
       .dropdown > span:focus {
         outline: none;
-        width: 6.3225rem;
+        width: 8.5rem;
         height: 0.99rem;
         box-shadow: 0 0 0 0.189rem rgba(0, 123, 255, 0.5);
       }

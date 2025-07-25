@@ -42,7 +42,7 @@ const fetchRecordCountRequestManager = new RequestManager();
 
 /* --------for collecting the outputs of all dropdown menu---------- */
 
-const selectedValues = {};
+// const selectedValues = {};// forced stop becouse the collection of the values into selectedValues variable has been moved into examDropDownUpdate.js module. but why! becouse to make dynamic dropdown menus, we needed to automate the process in a module. if you can remember, our OK button was inside the dropdownContainer div, clear button was outside this div. We also needed to make sure that OK button is visible only when the user has selected some examname first.
 
 const dropdownContainers = document.querySelectorAll('.dropdown-container .dropdown');
 
@@ -518,12 +518,47 @@ const clearButton = document.querySelector('.btn__2');
 
 clearButton.addEventListener('click', (e) => {
   e.preventDefault();
-  dropdownContainers.forEach(dropdown => {
+  const dropdownContainer = document.querySelector('.dropdown-container');
+  // Get all dropdown elements
+  const dropdownElements = dropdownContainer.querySelectorAll('.dropdown');
+  // forced stopbut why!Reason: it was a properly working code before the implemention of dynamic dropdown menu feature when it knew that those dropdowns are fixed and permanent and it has to reset them to previous values. but now, things have changed. Now every time clear button is pressed, it needs to show only the "EXAMs" dropdown menu, nothing else. 
+  // dropdownContainers.forEach(dropdown => {
+  //   const span = dropdown.querySelector('.selected-value');
+  //   span.textContent = span.getAttribute('data-default') || span.textContent;
+  //   span.removeAttribute('data-value');
+  //   span.removeAttribute('data-param');
+  // });
+
+  // show only the EXAMs dropdown menu after reseting it and removing the rest. 
+  dropdownElements.forEach(dropdown => {
     const span = dropdown.querySelector('.selected-value');
-    span.textContent = span.getAttribute('data-default') || span.textContent;
-    span.removeAttribute('data-value');
-    span.removeAttribute('data-param');
+    if (span) {
+      const dataDefault= span.getAttribute('data-default');
+      console.log(dataDefault);//debugging log
+      
+      if (dataDefault === 'EXAMs') {
+        console.log('Keeping Exams dropdown menu: ',dropdown);//debugging log
+          // Reseting it's contents. Not removing them
+          span.textContent = dataDefault;
+          span.removeAttribute('data-value');
+          span.removeAttribute('data-params');  
+      } else{
+        console.log('Removing Dropdown: ',dropdown);//debugging log
+        dropdown.remove();
+      };
+    } else {
+      console.log('NO selected-value found, removing:', dropdown);//debugging log
+      dropdown.remove();
+    }
   });
+
+  // Remove the OK button
+  const okButton = dropdownContainer.querySelector('.btn__1');
+  if (okButton) {
+    console.log('Removing OK button');
+    okButton.remove();
+  }
+
   
   updateOKButtonState();
   
