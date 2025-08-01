@@ -6,8 +6,8 @@
         height: 100%;
 
         /* grid-template-rows: 1fr, 1fr, 1fr, 1fr, 1fr, 1fr,1fr, 1fr, 1fr, 1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr;   20rows */
-        /* grid-template-rows: auto auto auto; forced stop 18/7/25 */
-        grid-template-rows: 120px 80px 400px;
+        /* grid-template-rows: auto auto auto; */
+        grid-template-rows: 420px 1px 100px 100px 100px;
         grid-template-columns: 1fr, 1fr, 1fr, 1fr, 1fr, 1fr,1fr,1fr;/*10 columns */
         /* grid-auto-rows: 30px;
         /* grid-template-columns: repeat(auto-fit, minmax(150px, 0.5fr)); */
@@ -147,7 +147,8 @@
         box-shadow: 0.54rem 0.54rem 0.675rem rgba(0, 0, 0, 0.589); /* Add shadow effect */
         /* margin-left: 2.7rem; */
         margin: 1rem;
-        height: 650px;
+        height: 950px;
+        padding-bottom: 150;
     }
     .dataActionArea{
       display: grid;
@@ -175,6 +176,7 @@
       margin: 1rem;
       margin-top: 0.1rem;
       padding-bottom: 1rem;
+      height: 900px;
     }
     .dropdown-container{
       /* grid-area: 2/1/12/2; forced stop18_7_2025  */
@@ -355,9 +357,9 @@
         height: 1400px;
         max-height: 2000px;
         padding: 0.5rem;
-        border: 1px solid #e0e0e0;
+        /* border: 1px solid #e0e0e0;
         border-radius: 0.5rem;
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.1); */
       }
       .dropdown {
         position: relative;
@@ -584,16 +586,17 @@
       gap: 20px;
       justify-content: flex-start;
       align-content: flex-start;
-      height: 400px;/*40vh; Set a fixed height */
+      height: 820px;/*40vh; Set a fixed height */
       width: 900px;/*90vw; Set a fixed width */
       overflow-y: auto; /* Enable vertical scrolling */
       padding: 20px;
+      padding-bottom: 100px;
       background-color: #f0f0f0;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 
       position: relative;
-      min-height: 100px;
+      min-height: 820px;
     }
     .examcenters img{
       width: auto;
