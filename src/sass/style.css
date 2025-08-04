@@ -7,7 +7,7 @@
 
         /* grid-template-rows: 1fr, 1fr, 1fr, 1fr, 1fr, 1fr,1fr, 1fr, 1fr, 1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr;   20rows */
         /* grid-template-rows: auto auto auto; */
-        grid-template-rows: 420px 1px 100px 100px 100px;
+        grid-template-rows: 420px 1px 100px 100px 100px; 
         grid-template-columns: 1fr, 1fr, 1fr, 1fr, 1fr, 1fr,1fr,1fr;/*10 columns */
         /* grid-auto-rows: 30px;
         /* grid-template-columns: repeat(auto-fit, minmax(150px, 0.5fr)); */
